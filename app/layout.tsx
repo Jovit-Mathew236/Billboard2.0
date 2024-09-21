@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-// import Head from "next/head";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -40,6 +39,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="apple-touch-startup-image" href="/splash.png" />
+        {/* Add multiple splash screen images for different iOS device sizes */}
         <link
           rel="apple-touch-startup-image"
           href="/splash-640x1136.png"
