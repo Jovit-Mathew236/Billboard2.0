@@ -50,7 +50,13 @@ function PushNotificationManager() {
       ),
     });
     setSubscription(sub);
-    await subscribeUser(sub);
+    await subscribeUser({
+      endpoint: sub.endpoint,
+      keys: {
+        p256dh: sub.getKey("p256dh")!.toString(),
+        auth: sub.getKey("auth")!.toString(),
+      },
+    });
   }
 
   async function unsubscribeFromPush() {
