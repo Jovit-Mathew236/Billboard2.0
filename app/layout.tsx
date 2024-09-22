@@ -1,16 +1,30 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+// const geistSans = localFont({
+//   src: "./fonts/GeistVF.woff",
+//   variable: "--font-geist-sans",
+//   weight: "100 900",
+// });
+// const geistMono = localFont({
+//   src: "./fonts/GeistMonoVF.woff",
+//   variable: "--font-geist-mono",
+//   weight: "100 900",
+// });
+const sfUiDisplayThin = localFont({
+  src: "./fonts/SF UI/sf-ui-display-thin.otf",
+  variable: "--font-sf-ui-display-thin",
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+
+const sfUiDisplayRegular = localFont({
+  src: "./fonts/SF UI/sf-ui-display-medium.otf",
+  variable: "--font-sf-ui-display-regular",
+});
+
+const sfUiDisplayBold = localFont({
+  src: "./fonts/SF UI/sf-ui-display-bold.otf",
+  variable: "--font-sf-ui-display-bold",
 });
 
 export const metadata: Metadata = {
@@ -28,8 +42,16 @@ export const metadata: Metadata = {
     initialScale: 1,
     maximumScale: 1,
   },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#FFFFFF",
+};
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -75,8 +97,12 @@ export default function RootLayout({
           href="/splash-2048x2732.png"
           media="(min-device-width: 1024px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 2)"
         />
+        {/* manifest */}
+        <link rel="manifest" href="/site.webmanifest" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body
+        className={`${sfUiDisplayRegular.variable} ${sfUiDisplayBold.variable} ${sfUiDisplayThin.variable}`}
+      >
         {children}
       </body>
     </html>
