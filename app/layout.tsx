@@ -12,19 +12,59 @@ import "./globals.css";
 //   variable: "--font-geist-mono",
 //   weight: "100 900",
 // });
-const sfUiDisplayThin = localFont({
-  src: "./fonts/SF UI/sf-ui-display-thin.otf",
-  variable: "--font-sf-ui-display-thin",
-});
-
-const sfUiDisplayRegular = localFont({
-  src: "./fonts/SF UI/sf-ui-display-medium.otf",
-  variable: "--font-sf-ui-display-regular",
-});
-
-const sfUiDisplayBold = localFont({
-  src: "./fonts/SF UI/sf-ui-display-bold.otf",
-  variable: "--font-sf-ui-display-bold",
+// const calSans = localFont({
+//   src: "./fonts/CalSans-SemiBold.woff",
+//   variable: "--font-cal-sans",
+//   weight: "100 900",
+// });
+const sfUiDisplay = localFont({
+  src: [
+    {
+      path: "./fonts/SF UI/sf-ui-display-thin.otf",
+      weight: "100",
+      style: "thin",
+    },
+    {
+      path: "./fonts/SF UI/sf-ui-display-ultralight.otf",
+      weight: "200",
+      style: "extralight",
+    },
+    {
+      path: "./fonts/SF UI/sf-ui-display-light.otf",
+      weight: "300",
+      style: "light",
+    },
+    {
+      path: "./fonts/SF UI/sf-ui-display-medium.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/SF UI/sf-ui-display-medium.otf",
+      weight: "500",
+      style: "medium",
+    },
+    {
+      path: "./fonts/SF UI/sf-ui-display-semibold.otf",
+      weight: "600",
+      style: "semibold",
+    },
+    {
+      path: "./fonts/SF UI/sf-ui-display-bold.otf",
+      weight: "700",
+      style: "bold",
+    },
+    {
+      path: "./fonts/SF UI/sf-ui-display-heavy.otf",
+      weight: "800",
+      style: "extrabold",
+    },
+    {
+      path: "./fonts/SF UI/sf-ui-display-black.otf",
+      weight: "900",
+      style: "black",
+    },
+  ],
 });
 
 export const metadata: Metadata = {
@@ -100,11 +140,7 @@ export default function RootLayout({
         {/* manifest */}
         <link rel="manifest" href="/site.webmanifest" />
       </head>
-      <body
-        className={`${sfUiDisplayRegular.variable} ${sfUiDisplayBold.variable} ${sfUiDisplayThin.variable}`}
-      >
-        {children}
-      </body>
+      <body className={`${sfUiDisplay.className} `}>{children}</body>
     </html>
   );
 }

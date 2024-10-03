@@ -36,7 +36,7 @@ const Login = () => {
     console.log(values);
   }
   return (
-    <div className="bg-[#C9CFDB] h-screen w-screen flex flex-col gap-9 justify-center items-center">
+    <div className="h-screen w-screen flex flex-col gap-9 justify-center items-center">
       {/* <h1 className="text-[#4C4C4C] font-semibold text-2xl text-center">
         Welcome to
         <br />
@@ -81,6 +81,7 @@ const Login = () => {
                   <FormControl>
                     <Input
                       placeholder="Password"
+                      type="password"
                       className="bg-[#F1F1F1] text-black h-12 border-none"
                       {...field}
                     />
@@ -99,10 +100,11 @@ const Login = () => {
         </Form>
         <div className="flex gap-4 justify-between w-11/12">
           <Button
+            variant={"secondary"}
             onClick={() => {
               window.location.href = "/";
             }}
-            className=" h-16 bg-[#EFEFEF] font-thin text-black text-md font-regular bottom-5 w-11/12 rounded-2xl"
+            className=" h-16 font-thin text-black text-md font-regular bottom-5 w-11/12 rounded-2xl"
           >
             Cancel
           </Button>

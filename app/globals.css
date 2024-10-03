@@ -3,21 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #C9CFDB;
   --foreground: #171717;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #C9CFDB;
+    --foreground: 0 0% 100%;
   }
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  /* font-family: var(--font-sf-ui-display-thin), var(--font-sf-ui-display-regular), var(--font-sf-ui-display-bold), var(--font-geist-mono); */
 }
 
 @layer utilities {
@@ -54,6 +54,7 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -86,6 +87,7 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
