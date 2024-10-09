@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { signInWithEmail } from "@/lib/firebase/auth"; // Import your login function
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "@/lib/firebase/auth"; // Import the auth state listener
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -24,6 +27,9 @@ const formSchema = z.object({
 });
 
 const Login = () => {
+  const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -31,19 +37,28 @@ const Login = () => {
       password: "",
     },
   });
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    window.location.href = "/admin";
-    console.log(values);
-  }
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      await signInWithEmail(values.username, values.password);
+      router.push("/admin"); // Redirect after successful login
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      setErrorMessage("Login failed. Please check your credentials."); // Handle error
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged((authUser) => {
+      if (authUser) {
+        router.push("/admin"); // Redirect if user is already logged in
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
   return (
     <div className="h-screen w-screen flex flex-col gap-9 justify-center items-center">
-      {/* <h1 className="text-[#4C4C4C] font-semibold text-2xl text-center">
-        Welcome to
-        <br />
-        <span className="bg-gradient-custom bg-clip-text text-transparent">
-          Billboard App
-        </span>
-      </h1> */}
       <Image
         src="/welcome.png"
         alt="welcome"
@@ -57,6 +72,11 @@ const Login = () => {
             onSubmit={form.handleSubmit(onSubmit)}
             className="bg-white rounded-xl py-16 px-10 w-11/12 space-y-6"
           >
+            {errorMessage && (
+              <div className="text-red-500 text-sm text-center">
+                {errorMessage}
+              </div>
+            )}
             <FormField
               control={form.control}
               name="username"
@@ -89,13 +109,12 @@ const Login = () => {
                   <FormMessage />
                   <div className="flex justify-end">
                     <a className="font-thin text-gray-400 text-xs">
-                      forget password
+                      Forgot password?
                     </a>
                   </div>
                 </FormItem>
               )}
             />
-            {/* forgent password */}
           </form>
         </Form>
         <div className="flex gap-4 justify-between w-11/12">
@@ -104,13 +123,14 @@ const Login = () => {
             onClick={() => {
               window.location.href = "/";
             }}
-            className=" h-16 font-thin text-black text-md font-regular bottom-5 w-11/12 rounded-2xl"
+            className="h-16 font-thin text-black text-md font-regular bottom-5 w-11/12 rounded-2xl"
           >
             Cancel
           </Button>
           <Button
+            type="submit"
             onClick={form.handleSubmit(onSubmit)}
-            className=" h-16 text-md font-thin font-regular bottom-5 w-11/12 rounded-2xl"
+            className="h-16 text-md font-thin font-regular bottom-5 w-11/12 rounded-2xl"
           >
             Login
           </Button>
