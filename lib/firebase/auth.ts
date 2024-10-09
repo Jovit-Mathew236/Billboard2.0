@@ -1,14 +1,14 @@
 import {
-  // GoogleAuthProvider,
-  // signInWithPopup,
   onAuthStateChanged as _onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   NextOrObserver,
   User,
+  signOut,
 } from "firebase/auth";
+import { auth } from "./config";
 
-import { auth } from "@/lib/firebase/clientApp";
+// import { auth } from "@/lib/firebase/clientApp";
 
 export function onAuthStateChanged(cb: NextOrObserver<User>) {
   return _onAuthStateChanged(auth, cb);
@@ -32,9 +32,13 @@ export async function signUpWithEmail(email: string, password: string) {
   }
 }
 
-export async function signOut() {
+export async function logOut() {
+  // const router = useRouter();
+
   try {
-    return auth.signOut();
+    signOut(auth);
+    // router.push("/");
+    window.location.href = "/";
   } catch (error) {
     console.error("Error signing out", error);
   }

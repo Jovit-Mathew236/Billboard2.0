@@ -1,32 +1,35 @@
-interface FirebaseConfig {
-  apiKey: string;
-  authDomain: string;
-  databaseURL: string;
-  projectId: string;
-  storageBucket: string;
-  messagingSenderId: string;
-  appId: string;
-}
+import { initializeApp, FirebaseApp } from "firebase/app";
+import { getAuth, updateProfile, Auth } from "firebase/auth";
+import { getFirestore, Firestore } from "firebase/firestore";
 
-const config: FirebaseConfig = {
+const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
-  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || "",
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "",
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
 };
 
-// When deployed, there are quotes that need to be stripped
-Object.keys(config).forEach((key) => {
-  const configValue = config[key as keyof FirebaseConfig] + "";
-  if (configValue.charAt(0) === '"') {
-    config[key as keyof FirebaseConfig] = configValue.substring(
-      1,
-      configValue.length - 1
-    );
-  }
-});
+const app: FirebaseApp = initializeApp(firebaseConfig);
+const auth: Auth = getAuth(app);
+const db: Firestore = getFirestore(app);
 
-export const firebaseConfig = config;
+const updateUser = (displayName: string) => {
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    console.error("No user is currently signed in.");
+    return;
+  }
+
+  updateProfile(currentUser, { displayName })
+    .then(() => {
+      console.log("Profile updated successfully");
+    })
+    .catch((error) => {
+      console.error("Error updating profile: ", error);
+    });
+};
+
+export { app, auth, updateUser, db };
