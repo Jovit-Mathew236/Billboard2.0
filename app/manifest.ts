@@ -4,11 +4,11 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Billboard",
     short_name: "Billboard",
-    description: "App for manage realtime billboards",
+    description: "App for managing real-time billboards",
     start_url: "/",
     display: "fullscreen",
-    background_color: "#ffffff",
-    theme_color: "#000000",
+    background_color: "#f0f0f0", // A light gray for a neutral splash screen
+    theme_color: "#ff5722", // A vibrant color for the status bar
     icons: [
       {
         src: "/android-chrome-192x192.png",
