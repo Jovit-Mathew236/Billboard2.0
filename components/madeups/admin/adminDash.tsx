@@ -1,8 +1,55 @@
+"use client";
+"use client";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 function AdminDash() {
+  const [startX, setStartX] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const router = useRouter();
+
+  const SWIPE_THRESHOLD = 100; // Minimum distance for a swipe to be valid
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsSwiping(true);
+    setStartX(e.clientX);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsSwiping(true);
+    setStartX(e.touches[0].clientX);
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (isSwiping) {
+      const distance = e.clientX - startX;
+      if (Math.abs(distance) > SWIPE_THRESHOLD) {
+        if (distance > 0) {
+          router.push("/admin/edit");
+        } else {
+          console.log("Swiped left");
+        }
+      }
+      setIsSwiping(false);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (isSwiping) {
+      const distance = e.changedTouches[0].clientX - startX;
+      if (Math.abs(distance) > SWIPE_THRESHOLD) {
+        if (distance > 0) {
+          router.push("/admin/edit");
+        } else {
+          console.log("Swiped left");
+        }
+      }
+      setIsSwiping(false);
+    }
+  };
+
   return (
     <>
       <div className="flex flex-col gap-10">
@@ -32,7 +79,7 @@ function AdminDash() {
               Manage Access
             </Button>
             <div className="flex flex-row gap-1 w-[30%]">
-              <p className="w-10 h-10 bg-gradient-to-br from-indigo-500  to-pink-500 rounded-full"></p>
+              <p className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-pink-500 rounded-full"></p>
               <p className="w-10 h-10 bg-black rounded-full"></p>
             </div>
           </div>
@@ -43,13 +90,13 @@ function AdminDash() {
                 <div className="text-light text-xs leading-3 text-gray-400">
                   <h1 className="text-3xl text-bold text-black var(--font-sf-ui-display-bold)">
                     100 <span className="text-sm text-gray-400">hrs</span>
-                  </h1>{" "}
+                  </h1>
                   Server up time
                 </div>
                 <div className="text-light text-xs leading-3 text-gray-400">
                   <h1 className="text-3xl text-bold text-black var(--font-sf-ui-display-bold)">
                     5 <span className="text-sm text-gray-400"></span>
-                  </h1>{" "}
+                  </h1>
                   Users with access
                 </div>
               </div>
@@ -58,13 +105,13 @@ function AdminDash() {
                 <div className="text-light text-xs leading-3 text-gray-400">
                   <h1 className="text-3xl text-bold text-black var(--font-sf-ui-display-bold)">
                     Good <span className="text-sm text-gray-400"></span>
-                  </h1>{" "}
+                  </h1>
                   Api health status
                 </div>
                 <div className="text-light text-xs leading-3 text-gray-400">
                   <h1 className="text-3xl text-bold text-black var(--font-sf-ui-display-bold)">
                     7 <span className="text-sm text-gray-400"></span>
-                  </h1>{" "}
+                  </h1>
                   Themes Available
                 </div>
               </div>
@@ -82,6 +129,11 @@ function AdminDash() {
       <Button
         className="absolute bottom-8 w-[calc(100%-48px)] text-gray-400 h-20 rounded-full"
         variant={"secondary"}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={() => setIsSwiping(false)} // reset when leaving
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         swipe right for edits ---&gt;
       </Button>
