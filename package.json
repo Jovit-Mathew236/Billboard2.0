@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "bun run generate-manifest && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate-manifest": "bun run generate-manifest.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
