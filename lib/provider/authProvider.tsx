@@ -40,11 +40,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (docSnap.exists()) {
           const userData = docSnap.data();
-          setUsername(userData.name || null); // Set username if exists
+          setUsername(userData.username || null); // Set username if exists
         } else {
           console.error("No such document!");
         }
-        router.push("/admin"); // Redirect after fetching user data
+        // router.push("/admin"); // Redirect after fetching user data
       }
 
       setLoading(false); // Stop loading

@@ -73,7 +73,7 @@ function AdminDash() {
             />
           </h1>
 
-          <div className="flex flex-col gap-[3dvh] w-full p-4 min-h-4 bg-white rounded-3xl">
+          <div className="flex flex-col gap-[3dvh] w-full py-8 px-6 min-h-4 bg-white rounded-3xl">
             <div className="w-full max-w-full flex">
               <div className="flex flex-row w-[30%]">
                 <div className="flex flex-row items-center justify-center">
