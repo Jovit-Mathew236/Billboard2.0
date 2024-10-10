@@ -57,7 +57,7 @@ function AdminDash() {
   if (user) {
     return (
       <>
-        <div className="flex flex-col gap-10">
+        <div className="flex flex-col justify-evenly h-[70dvh]">
           <h1 className="text-3xl">
             Welcome 👋
             <br />
@@ -71,7 +71,7 @@ function AdminDash() {
             />
           </h1>
 
-          <div className="flex flex-col gap-8 w-full p-8 min-h-4 bg-white rounded-3xl">
+          <div className="flex flex-col gap-[3dvh] w-full p-8 min-h-4 bg-white rounded-3xl">
             <div className="w-full max-w-full flex">
               <div className="flex flex-row w-[30%]">
                 <p className="w-10 h-10 bg-cyan-200 rounded-full"></p>

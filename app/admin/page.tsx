@@ -1,7 +1,7 @@
 "use client";
 import AdminDash from "@/components/madeups/admin/adminDash";
 import { auth } from "@/lib/firebase/config";
-import { AuthProvider } from "@/lib/provider/authProvider";
+// import { AuthProvider } from "@/lib/provider/authProvider";
 import { onAuthStateChanged } from "firebase/auth";
 // import useRouter from "next/router";
 import React, { useEffect, useState } from "react";
@@ -21,11 +21,7 @@ const Home = () => {
     });
     return unsubscribe;
   }, [uid]);
-  return (
-    <AuthProvider>
-      <AdminDash />{" "}
-    </AuthProvider>
-  );
+  return <AdminDash />;
 };
 
 export default Home;

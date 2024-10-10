@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HeaderButtons from "@/components/ui/headerButtons"; // Import the new component
+import { AuthProvider } from "@/lib/provider/authProvider";
 
 export const metadata: Metadata = {
   title: "Billboard | admin",
@@ -12,8 +13,10 @@ export default function RootLayout({
 }>) {
   return (
     <div>
-      <HeaderButtons />
-      <div className="px-6 mt-10">{children}</div>
+      <AuthProvider>
+        <HeaderButtons />
+        <div className="px-6 mt-[2dvh]">{children}</div>
+      </AuthProvider>
     </div>
   );
 }
