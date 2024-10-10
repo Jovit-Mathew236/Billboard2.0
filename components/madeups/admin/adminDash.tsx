@@ -5,6 +5,8 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/provider/authProvider";
+import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
+import { people } from "@/lib/constants";
 
 function AdminDash() {
   const { user, username, loading } = useAuth();
@@ -71,12 +73,12 @@ function AdminDash() {
             />
           </h1>
 
-          <div className="flex flex-col gap-[3dvh] w-full p-8 min-h-4 bg-white rounded-3xl">
+          <div className="flex flex-col gap-[3dvh] w-full p-4 min-h-4 bg-white rounded-3xl">
             <div className="w-full max-w-full flex">
               <div className="flex flex-row w-[30%]">
-                <p className="w-10 h-10 bg-cyan-200 rounded-full"></p>
-                <p className="w-10 h-10 bg-slate-300 rounded-full -ml-4"></p>
-                <p className="w-10 h-10 bg-orange-200 rounded-full -ml-4"></p>
+                <div className="flex flex-row items-center justify-center">
+                  <AnimatedTooltip items={people} />
+                </div>
               </div>
               <Button
                 variant={"ghost"}
@@ -84,7 +86,7 @@ function AdminDash() {
               >
                 Manage Access
               </Button>
-              <div className="flex flex-row gap-1 w-[30%]">
+              <div className="flex flex-row gap-1 w-[30%] place-content-end">
                 <p className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-pink-500 rounded-full"></p>
                 <p className="w-10 h-10 bg-black rounded-full"></p>
               </div>

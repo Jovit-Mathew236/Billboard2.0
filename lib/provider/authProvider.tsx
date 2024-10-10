@@ -31,7 +31,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setUser(user);
       setLoading(true); // Start loading
-
+      if (!user) {
+        router.push("/login");
+      }
       if (user) {
         const userDoc = doc(db, "users", user.uid); // Adjust collection name as needed
         const docSnap = await getDoc(userDoc);

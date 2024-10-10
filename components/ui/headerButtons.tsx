@@ -18,8 +18,18 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import LogoutButton from "@/components/ui/logoutButton";
+import { dp } from "@/lib/constants";
+import Image from "next/image";
 
 export default function HeaderButtons() {
   const router = useRouter();
@@ -87,10 +97,39 @@ export default function HeaderButtons() {
       >
         <BellDot color="#4C4C4C" size={20} />
       </Button>
-      <Button
-        variant={"primary"}
-        className="rounded-full p-0 w-[50px] h-[50px]"
-      ></Button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant={"primary"}
+            className="rounded-full p-0 w-[50px] h-[50px]"
+          >
+            <Image
+              src={dp}
+              width={500}
+              height={500}
+              alt="Picture of the user"
+              className="rounded-full w-full h-full object-cover"
+            />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>Profile</DropdownMenuItem>
+          <DropdownMenuItem>
+            <Button
+              variant="outline"
+              className="h-fit p-0 border-none m-0 w-fit"
+              onClick={() => router.push("/admin/create")}
+            >
+              Add new user
+            </Button>
+          </DropdownMenuItem>
+          {/* <DropdownMenuItem>Team</DropdownMenuItem>
+          <DropdownMenuItem>Subscription</DropdownMenuItem> */}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

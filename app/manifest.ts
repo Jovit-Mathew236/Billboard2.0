@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Billboard",
     description: "App for managing real-time billboards",
     start_url: "/",
-    display: "fullscreen",
+    display: "standalone",
     background_color: "#f0f0f0", // A light gray for a neutral splash screen
     theme_color: "#ff5722", // A vibrant color for the status bar
     icons: [
