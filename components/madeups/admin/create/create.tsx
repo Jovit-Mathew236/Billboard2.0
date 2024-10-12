@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -24,25 +24,26 @@ import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebase/config";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-// import { useRouter } from "next/navigation";
-// import { create } from "domain";
 import { db } from "@/lib/firebase/config"; // Import Firestore instance
 import { doc, setDoc } from "firebase/firestore";
+import { s3 } from "@/lib/awsConfig"; // Import your S3 config
+import { useAuth } from "@/lib/provider/authProvider";
+// import imageConversion from "image-conversion";
 
 const formSchema = z.object({
-  email: z.string().min(2, {
-    message: "Enter a valid email.",
-  }),
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  password: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
-  }),
+  email: z.string().min(2, { message: "Enter a valid email." }),
+  username: z
+    .string()
+    .min(2, { message: "Username must be at least 2 characters." }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters." }),
   role: z.enum(["admin", "superadmin", "faculty"]),
+  image: z.instanceof(File).optional(), // Add image field
 });
 
 const Create = () => {
+  const { user: currentUser, username } = useAuth();
   //   const router = useRouter();
   const [createUserWithEmailAndPassword] =
     useCreateUserWithEmailAndPassword(auth);
@@ -56,42 +57,84 @@ const Create = () => {
       username: "",
     },
   });
-  //   useEffect(() => {
-  //     const unsubscribe = auth.onAuthStateChanged((user) => {
-  //       if (!user) {
-  //         router.push("/login");
-  //       }
-  //     });
-  //     return unsubscribe;
-  //   }, [router]);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      // Create user with email and password
+      // Step 1: Create user with email and password
       const userCredential = await createUserWithEmailAndPassword(
         data.email,
         data.password
       );
 
-      // Check if userCredential is defined
       if (!userCredential) {
         throw new Error("User creation failed");
       }
 
-      // Get the user UID
       const user = userCredential.user;
 
-      // Prepare user details to save
+      // Step 2: Prepare user details to save
       const userDetails = {
         username: data.username,
         email: data.email,
         role: data.role,
+        addedBy: username,
+        addedByUid: currentUser!.uid,
       };
 
-      // Add user details to Firestore
-      await setDoc(doc(db, "users", user.uid), userDetails);
+      let imageUrl = "";
+      if (data.image) {
+        // Read the image as Base64
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64data = reader.result?.toString().split(",")[1]; // Extract Base64 part
+          const response = await fetch("/api/convert-image", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ image: base64data }),
+          });
 
-      console.log("User created and details added to Firestore:", userDetails);
+          if (response.ok) {
+            const result = await response.json();
+            imageUrl = result.image;
+
+            // Step 3: Upload to S3
+            const params = {
+              Bucket: process.env.NEXT_PUBLIC_AWS_S3_BUCKET!,
+              Key: `users/${user.uid}.webp`,
+              Body: Buffer.from(result.image.split(",")[1], "base64"), // Convert back to Buffer
+              ContentType: "image/webp",
+            };
+
+            const uploadResult = await s3.upload(params).promise();
+            console.log("Image uploaded successfully");
+
+            imageUrl = uploadResult.Location; // Get the uploaded image URL
+
+            // Step 4: Save user details to Firestore
+            await setDoc(doc(db, "users", user.uid), {
+              ...userDetails,
+              ...(imageUrl && { imageUrl }), // Add imageUrl if it exists
+            });
+
+            console.log(
+              "User created and details added to Firestore:",
+              userDetails
+            );
+          } else {
+            console.error("Error converting image:", await response.text());
+          }
+        };
+
+        reader.readAsDataURL(data.image); // Read the image as Base64
+      } else {
+        // If no image, save user details directly to Firestore
+        await setDoc(doc(db, "users", user.uid), userDetails);
+        console.log("User created without image:", userDetails);
+      }
     } catch (error) {
       console.error("Error creating user or adding details:", error);
     }
@@ -99,20 +142,6 @@ const Create = () => {
 
   return (
     <div className="flex flex-col gap-9 justify-center items-center">
-      {/* <h1 className="text-[#4C4C4C] font-semibold text-2xl text-center">
-        Welcome to
-        <br />
-        <span className="bg-gradient-custom bg-clip-text text-transparent">
-          Billboard App
-        </span>
-      </h1> */}
-      {/* <Image
-        src="/welcome.png"
-        alt="welcome"
-        width={2000}
-        height={2000}
-        className="w-[200px] h-auto"
-      /> */}
       <div className="w-full flex flex-col gap-4 items-center">
         <Form {...form}>
           <form
@@ -202,7 +231,29 @@ const Create = () => {
                 </FormItem>
               )}
             />
-            {/* forgent password */}
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          field.onChange(e.target.files[0]);
+                        }
+                      }}
+                      className="bg-[#F1F1F1] text-black h-12 border-none"
+                      ref={fileInputRef}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* forget password */}
           </form>
         </Form>
         <div className="flex gap-4 justify-between w-11/12">

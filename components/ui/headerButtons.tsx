@@ -30,8 +30,10 @@ import {
 import LogoutButton from "@/components/ui/logoutButton";
 import { dp } from "@/lib/constants";
 import Image from "next/image";
+import { useAuth } from "@/lib/provider/authProvider";
 
 export default function HeaderButtons() {
+  const { userImage } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -105,7 +107,7 @@ export default function HeaderButtons() {
             className="rounded-full p-0 w-[50px] h-[50px]"
           >
             <Image
-              src={dp}
+              src={userImage || dp}
               width={500}
               height={500}
               alt="Picture of the user"

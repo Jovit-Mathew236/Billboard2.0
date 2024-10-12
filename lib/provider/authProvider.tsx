@@ -10,12 +10,14 @@ import { doc, getDoc } from "firebase/firestore"; // Import Firestore functions
 interface AuthContextType {
   user: User | null;
   username: string | null; // Add username to context
+  userImage: string | null; // Add userImage to context
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   username: null,
+  userImage: null,
   loading: true,
 });
 
@@ -24,6 +26,7 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState<string | null>(null); // State for username
+  const [userImage, setUserImage] = useState<string | null>(null); // State for userImage
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -41,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (docSnap.exists()) {
           const userData = docSnap.data();
           setUsername(userData.username || null); // Set username if exists
+          setUserImage(userData.imageUrl || null); // Set userImage if exists
         } else {
           console.error("No such document!");
         }
@@ -54,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   return (
-    <AuthContext.Provider value={{ user, username, loading }}>
+    <AuthContext.Provider value={{ user, username, userImage, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );

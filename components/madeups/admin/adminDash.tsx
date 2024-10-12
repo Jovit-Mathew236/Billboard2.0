@@ -1,20 +1,40 @@
 "use client";
-"use client";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/provider/authProvider";
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
-import { people } from "@/lib/constants";
+// import { people } from "@/lib/constants";
+import {
+  collection,
+  getDocs,
+  CollectionReference,
+  DocumentData,
+} from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
+import { dp } from "@/lib/constants";
+
+// Define a type for user data
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  addedBy: string;
+  addedByUid: string;
+  imageUrl: string;
+  // Add other user fields as needed
+}
 
 function AdminDash() {
   const { user, username, loading } = useAuth();
   const [startX, setStartX] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
+  const [usersData, setUsersData] = useState<User[]>([]); // Use the User type for state
   const router = useRouter();
 
-  const SWIPE_THRESHOLD = 100; // Minimum distance for a swipe to be valid
+  const SWIPE_THRESHOLD = 100;
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsSwiping(true);
@@ -53,6 +73,27 @@ function AdminDash() {
       setIsSwiping(false);
     }
   };
+
+  // Fetch users from Firestore and set state
+  const fetchUsers = async () => {
+    const usersCollection = collection(
+      db,
+      "users"
+    ) as CollectionReference<DocumentData>;
+    const snapshot = await getDocs(usersCollection);
+    const usersArray = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as User[];
+    setUsersData(usersArray); // Update state with users data
+  };
+
+  // Fetch users when component mounts
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+  console.log(usersData);
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -77,7 +118,16 @@ function AdminDash() {
             <div className="w-full max-w-full flex">
               <div className="flex flex-row w-[30%]">
                 <div className="flex flex-row items-center justify-center">
-                  <AnimatedTooltip items={people} />
+                  <AnimatedTooltip
+                    items={usersData.map((user, i) => {
+                      return {
+                        id: i,
+                        name: user.username,
+                        designation: user.role,
+                        image: user.imageUrl || dp,
+                      };
+                    })}
+                  />
                 </div>
               </div>
               <Button
@@ -149,5 +199,4 @@ function AdminDash() {
     );
   }
 }
-
 export default AdminDash;
