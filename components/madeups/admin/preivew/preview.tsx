@@ -66,7 +66,7 @@ const Preview = () => {
         {" "}
         {/* 9:16 aspect ratio */}
         <iframe
-          src="google.com" // Replace with the URL you want to load
+          src="https://billboardsjcetapp.netlify.app" // Replace with the URL you want to load
           style={{
             position: "absolute",
             top: 0,
