@@ -3,20 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --background: #C9CFDB;
-  --foreground: #171717;
+  --background: 210, 14%, 85%;
+  --foreground: 0, 0%, 9%;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #C9CFDB;
-    --foreground: 0 0% 100%;
+    --background: 210, 14%, 85%;
+    --foreground: 0, 0%, 100%;
   }
 }
 
+
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
   /* font-family: var(--font-sf-ui-display-thin), var(--font-sf-ui-display-regular), var(--font-sf-ui-display-bold), var(--font-geist-mono); */
 }
 
