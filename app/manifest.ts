@@ -29,7 +29,7 @@ export default function manifest(): MetadataRoute.Manifest {
     shortcuts: [
       {
         name: "Add user",
-        url: "/create",
+        url: "admin/create",
         description: "Create new user",
         icons: [
           {

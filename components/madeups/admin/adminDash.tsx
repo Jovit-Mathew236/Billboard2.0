@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { dp } from "@/lib/constants";
+import { Power, SwatchBook } from "lucide-react";
 
 // Define a type for user data
 interface User {
@@ -137,8 +138,12 @@ function AdminDash() {
                 Manage Access
               </Button>
               <div className="flex flex-row gap-1 w-[30%] place-content-end">
-                <p className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-pink-500 rounded-full"></p>
-                <p className="w-10 h-10 bg-black rounded-full"></p>
+                <p className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-pink-500 rounded-full flex justify-center items-center">
+                  <SwatchBook color="white" />
+                </p>
+                <p className="w-10 h-10 bg-black rounded-full flex justify-center items-center">
+                  <Power color="white" />
+                </p>
               </div>
             </div>
 
