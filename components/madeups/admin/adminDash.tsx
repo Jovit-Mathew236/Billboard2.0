@@ -158,7 +158,8 @@ function AdminDash() {
                   </div>
                   <div className="text-light text-xs leading-3 text-gray-400">
                     <h1 className="text-3xl text-bold text-black var(--font-sf-ui-display-bold)">
-                      5 <span className="text-sm text-gray-400"></span>
+                      {usersData.length}{" "}
+                      <span className="text-sm text-gray-400"></span>
                     </h1>
                     Users with access
                   </div>
