@@ -188,7 +188,14 @@ function AdminDash() {
               <div className="h-[8px] w-[30%] bg-gray-800 rounded-full"></div>
             </div>
           </div>
-          <Button className="h-20 rounded-full">Active Preview</Button>
+          <Button
+            className="h-20 rounded-full"
+            onClick={() => {
+              router.push("/admin/preview");
+            }}
+          >
+            Active Preview
+          </Button>
         </div>
         <Button
           className="absolute bottom-8 w-[calc(100%-48px)] text-gray-400 h-20 rounded-full"
