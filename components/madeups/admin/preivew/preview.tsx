@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import SwipeButton from "@/components/swipe-button";
+import { useRouter } from "next/navigation";
 interface Font {
   family: string;
   variants: string[];
@@ -29,6 +31,7 @@ interface Font {
 const Preview = () => {
   const [fonts, setFonts] = useState<Font[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchFonts = async () => {
@@ -81,17 +84,12 @@ const Preview = () => {
       </div>
 
       <div className="flex justify-between gap-1 absolute bottom-8  w-[calc(100%-48px)]">
-        <Button
-          className=" w-[75%] text-gray-400 h-16 rounded-full"
-          variant={"secondary"}
-          //    onMouseDown={handleMouseDown}
-          //    onMouseUp={handleMouseUp}
-          //    onMouseLeave={() => setIsSwiping(false)} // reset when leaving
-          //    onTouchStart={handleTouchStart}
-          //    onTouchEnd={handleTouchEnd}
-        >
-          swipe right for edits ---&gt;
-        </Button>
+        <SwipeButton
+          label="Swipe right for edits ---&gt;"
+          className="w-[75%] text-gray-400 h-16 rounded-full"
+          onSwipeRight={() => router.push("/admin/edit")}
+          onSwipeLeft={() => console.log("Swiped left")}
+        />
 
         <Dialog>
           <DialogTrigger asChild>

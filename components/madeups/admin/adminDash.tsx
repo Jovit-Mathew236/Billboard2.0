@@ -15,6 +15,7 @@ import {
 import { db } from "@/lib/firebase/config";
 import { dp } from "@/lib/constants";
 import { Power, SwatchBook } from "lucide-react";
+import SwipeButton from "@/components/swipe-button";
 
 // Define a type for user data
 interface User {
@@ -30,50 +31,8 @@ interface User {
 
 function AdminDash() {
   const { user, username, loading } = useAuth();
-  const [startX, setStartX] = useState(0);
-  const [isSwiping, setIsSwiping] = useState(false);
   const [usersData, setUsersData] = useState<User[]>([]); // Use the User type for state
   const router = useRouter();
-
-  const SWIPE_THRESHOLD = 100;
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsSwiping(true);
-    setStartX(e.clientX);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setIsSwiping(true);
-    setStartX(e.touches[0].clientX);
-  };
-
-  const handleMouseUp = (e: React.MouseEvent) => {
-    if (isSwiping) {
-      const distance = e.clientX - startX;
-      if (Math.abs(distance) > SWIPE_THRESHOLD) {
-        if (distance > 0) {
-          router.push("/admin/edit");
-        } else {
-          console.log("Swiped left");
-        }
-      }
-      setIsSwiping(false);
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (isSwiping) {
-      const distance = e.changedTouches[0].clientX - startX;
-      if (Math.abs(distance) > SWIPE_THRESHOLD) {
-        if (distance > 0) {
-          router.push("/admin/edit");
-        } else {
-          console.log("Swiped left");
-        }
-      }
-      setIsSwiping(false);
-    }
-  };
 
   // Fetch users from Firestore and set state
   const fetchUsers = async () => {
@@ -102,7 +61,7 @@ function AdminDash() {
     return (
       <>
         <div className="flex flex-col justify-evenly h-[70dvh]">
-          <h1 className="text-3xl">
+          <h1 className="text-3xl text-card-foreground">
             Welcome 👋
             <br />
             <b className="text-4xl text-bold">Mr. {username}</b>
@@ -197,17 +156,13 @@ function AdminDash() {
             Active Preview
           </Button>
         </div>
-        <Button
+
+        <SwipeButton
+          label="Swipe right for edits ---&gt;"
           className="absolute bottom-8 w-[calc(100%-48px)] text-gray-400 h-20 rounded-full"
-          variant={"secondary"}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={() => setIsSwiping(false)} // reset when leaving
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
-          swipe right for edits ---&gt;
-        </Button>
+          onSwipeRight={() => router.push("/admin/edit")}
+          onSwipeLeft={() => console.log("Swiped left")}
+        />
       </>
     );
   }
