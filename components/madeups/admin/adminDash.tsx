@@ -11,6 +11,7 @@ import {
   getDocs,
   CollectionReference,
   DocumentData,
+  getCountFromServer,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { dp } from "@/lib/constants";
@@ -32,6 +33,7 @@ interface User {
 function AdminDash() {
   const { user, username, loading } = useAuth();
   const [usersData, setUsersData] = useState<User[]>([]); // Use the User type for state
+  const [themeCount, setThemeCount] = useState<number>(0); // Use the User type for state
   const router = useRouter();
 
   // Fetch users from Firestore and set state
@@ -47,10 +49,20 @@ function AdminDash() {
     })) as User[];
     setUsersData(usersArray); // Update state with users data
   };
+  const fetchThemeCount = async () => {
+    const usersCollection = collection(
+      db,
+      "themes"
+    ) as CollectionReference<DocumentData>;
+    const snapshot = await getCountFromServer(usersCollection);
+    const theme_count = snapshot.data().count;
+    setThemeCount(theme_count); // Update state with users data
+  };
 
   // Fetch users when component mounts
   useEffect(() => {
     fetchUsers();
+    fetchThemeCount();
   }, []);
   console.log(usersData);
 
@@ -133,7 +145,8 @@ function AdminDash() {
                   </div>
                   <div className="text-light text-xs leading-3 text-gray-400">
                     <h1 className="text-3xl text-bold text-black var(--font-sf-ui-display-bold)">
-                      7 <span className="text-sm text-gray-400"></span>
+                      {themeCount}
+                      <span className="text-sm text-gray-400"></span>
                     </h1>
                     Themes Available
                   </div>
