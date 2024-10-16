@@ -122,7 +122,7 @@ export default function HeaderButtons() {
           <DropdownMenuItem>
             <Button
               variant="outline"
-              className="h-fit p-0 border-none m-0 w-fit"
+              className="h-fit p-0 border-none m-0 w-fit bg-white"
               onClick={() => router.push("/admin/create")}
             >
               Add new user

@@ -15,7 +15,7 @@ export default function RootLayout({
     <div>
       <AuthProvider>
         <HeaderButtons />
-        <div className="px-6 mt-[2dvh]">{children}</div>
+        <div className="px-6 mt-[0dvh]">{children}</div>
       </AuthProvider>
     </div>
   );

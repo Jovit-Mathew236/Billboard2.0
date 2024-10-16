@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 // const geistSans = localFont({
 //   src: "./fonts/GeistVF.woff",
@@ -145,7 +146,10 @@ export default function RootLayout({
         {/* manifest */}
         <link rel="manifest" href="/site.webmanifest" />
       </head>
-      <body className={`${sfUiDisplay.className} `}>{children}</body>
+      <body className={`${sfUiDisplay.className} `}>
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }

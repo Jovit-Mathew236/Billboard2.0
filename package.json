@@ -17,6 +17,7 @@
     "@radix-ui/react-popover": "^1.1.2",
     "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-toast": "^1.2.2",
     "@types/sharp": "^0.32.0",
     "aws-sdk": "^2.1691.0",
     "class-variance-authority": "^0.7.0",

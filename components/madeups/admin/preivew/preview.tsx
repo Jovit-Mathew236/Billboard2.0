@@ -1,61 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import SwipeButton from "@/components/swipe-button";
 import { useRouter } from "next/navigation";
-interface Font {
-  family: string;
-  variants: string[];
-  subsets: string[];
-}
-
+import { CreateTheme } from "./create-theme";
 const Preview = () => {
-  const [fonts, setFonts] = useState<Font[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchFonts = async () => {
-      try {
-        const response = await fetch("/api/webfonts", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch fonts");
-        }
-        const data = await response.json();
-        setFonts(data.font.items);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (err: any) {
-        setError(err.message);
-        console.log(error);
-      }
-    };
-
-    fetchFonts();
-  }, [error]);
   return (
     <>
       <div
@@ -63,7 +14,7 @@ const Preview = () => {
         style={{
           padding: "97% 52%",
           margin: "-24px -7px",
-          transform: "scale(0.95)",
+          transform: "scale(0.9)",
         }}
       >
         {" "}
@@ -105,55 +56,8 @@ const Preview = () => {
               <Plus />
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] w-10/12 text-black rounded-lg">
-            <DialogHeader>
-              <DialogTitle>Edit profile</DialogTitle>
-              <DialogDescription>
-                Make changes to your profile here. Click save when done.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  defaultValue="Pedro Duarte"
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="username" className="text-right">
-                  Username
-                </Label>
-                <Input
-                  id="username"
-                  defaultValue="@peduarte"
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="font" className="text-right">
-                  Font
-                </Label>
-                <Select>
-                  <SelectTrigger className="">
-                    <SelectValue placeholder="Role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fonts.map((font, i) => (
-                      <SelectItem key={i} value={font.family}>
-                        {font.family}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit">Save changes</Button>
-            </DialogFooter>
+          <DialogContent className="sm:max-w-[425px] w-10/12 text-black rounded-lg bg-white overflow-y-scroll max-h-[90dvh]">
+            <CreateTheme />
           </DialogContent>
         </Dialog>
       </div>
