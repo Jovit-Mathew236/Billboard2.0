@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BellDot, Settings } from "lucide-react";
+import { ArrowLeft, BellDot, ImageDownIcon, Settings } from "lucide-react";
 // import {
 //   Popover,
 //   PopoverContent,
@@ -98,6 +98,15 @@ export default function HeaderButtons() {
         className="rounded-full p-0 w-[50px] h-[50px]"
       >
         <BellDot color="#4C4C4C" size={20} />
+      </Button>
+      <Button
+        variant={"primary"}
+        className="rounded-full p-0 w-[50px] h-[50px]"
+        onClick={() => {
+          router.push("/admin/image");
+        }}
+      >
+        <ImageDownIcon color="#4C4C4C" size={20} />
       </Button>
 
       <DropdownMenu>
