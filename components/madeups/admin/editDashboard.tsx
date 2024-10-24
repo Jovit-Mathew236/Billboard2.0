@@ -173,6 +173,7 @@ const EditDashboard = () => {
               "mousedown",
               handleDragStart
             );
+            // eslint-disable-next-line react-hooks/exhaustive-deps
             containerRef.current.removeEventListener(
               "touchstart",
               handleDragStart
