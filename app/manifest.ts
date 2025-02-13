@@ -11,8 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#f0f0f0", // A light gray for a neutral splash screen
-    theme_color: "#ff5722", // A vibrant color for the status bar
+    background_color: "#ffffff", // Change to white for better contrast in light theme
+    theme_color: "#ff5722", // Ensure this is a vibrant color for dark theme
     icons: [
       {
         src: "/android-chrome-192x192.png",

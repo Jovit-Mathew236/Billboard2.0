@@ -2,6 +2,7 @@
 
 // import { useState, useEffect } from "react";
 // import { subscribeUser, unsubscribeUser, sendNotification } from "./actions";
+import Head from "next/head";
 import GetStart from "@/components/get-start";
 
 // function urlBase64ToUint8Array(base64String: string) {
@@ -144,10 +145,17 @@ import GetStart from "@/components/get-start";
 
 export default function Page() {
   return (
-    <div>
-      {/* <PushNotificationManager />
-      <InstallPrompt /> */}
-      <GetStart />
-    </div>
+    <>
+      <Head>
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#0ed3cf" />
+        <meta name="msapplication-TileColor" content="#0ed3cf" />
+        <meta name="theme-color" content="#0ed3cf" />
+      </Head>
+      <div>
+        {/* <PushNotificationManager />
+        <InstallPrompt /> */}
+        <GetStart />
+      </div>
+    </>
   );
 }
