@@ -73,7 +73,7 @@ export const metadata: Metadata = {
   title: "Billboard",
   description: "App for manage realtime billboards",
   manifest: "/site.webmanifest",
-  themeColor: "#ffffff",
+  themeColor: "#0ed3cf",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -92,7 +92,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFFFFF",
+  themeColor: "#0ed3cf",
 };
 export default function RootLayout({
   children,
