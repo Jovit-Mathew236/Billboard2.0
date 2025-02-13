@@ -2,7 +2,14 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BellDot, ImageDownIcon, Settings } from "lucide-react";
+import {
+  ArrowLeft,
+  BellDot,
+  ImageDownIcon,
+  Settings,
+  Sun,
+  Moon,
+} from "lucide-react";
 // import {
 //   Popover,
 //   PopoverContent,
@@ -31,9 +38,11 @@ import LogoutButton from "@/components/ui/logoutButton";
 import { dp } from "@/lib/constants";
 import Image from "next/image";
 import { useAuth } from "@/lib/provider/authProvider";
+import { useTheme } from "next-themes";
 
 export default function HeaderButtons() {
   const { userImage } = useAuth();
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -42,11 +51,11 @@ export default function HeaderButtons() {
       {pathname !== "/admin" && (
         <div className="flex-1">
           <Button
-            variant={"primary"}
+            variant="primary"
             className="rounded-full p-0 w-[50px] h-[50px] place-self-start"
             onClick={() => router.back()}
           >
-            <ArrowLeft color="#4C4C4C" size={20} />
+            <ArrowLeft className="text-primary-foreground" size={20} />
           </Button>
         </div>
       )}
@@ -54,25 +63,47 @@ export default function HeaderButtons() {
       <Drawer>
         <DrawerTrigger asChild>
           <Button
-            variant={"primary"}
+            variant="primary"
             className="rounded-full p-0 w-[50px] h-[50px]"
           >
-            <Settings color="#4C4C4C" size={20} />
+            <Settings className="text-primary-foreground" size={20} />
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="bg-white">
+        <DrawerContent className="bg-background">
           <div className="mx-auto w-full max-w-sm">
             <DrawerHeader>
-              <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-              <DrawerDescription>
-                This will logout your account.
-              </DrawerDescription>
+              <DrawerTitle>Settings</DrawerTitle>
+              <DrawerDescription>Customize your experience</DrawerDescription>
             </DrawerHeader>
-            <DrawerFooter>
+            <div className="p-4 flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Theme</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-2"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                >
+                  {theme === "dark" ? (
+                    <>
+                      <Sun className="h-5 w-5" />
+                      Light Mode
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="h-5 w-5" />
+                      Dark Mode
+                    </>
+                  )}
+                </Button>
+              </div>
+              <div className="border-t border-border/50" />
               <LogoutButton />
+            </div>
+            <DrawerFooter>
               <DrawerClose>
                 <Button variant="outline" className="w-full">
-                  Cancel
+                  Close
                 </Button>
               </DrawerClose>
             </DrawerFooter>
@@ -93,26 +124,21 @@ export default function HeaderButtons() {
           <LogoutButton />
         </PopoverContent>
       </Popover> */}
-      <Button
-        variant={"primary"}
-        className="rounded-full p-0 w-[50px] h-[50px]"
-      >
-        <BellDot color="#4C4C4C" size={20} />
+      <Button variant="primary" className="rounded-full p-0 w-[50px] h-[50px]">
+        <BellDot className="text-primary-foreground" size={20} />
       </Button>
       <Button
-        variant={"primary"}
+        variant="primary"
         className="rounded-full p-0 w-[50px] h-[50px]"
-        onClick={() => {
-          router.push("/admin/image");
-        }}
+        onClick={() => router.push("/admin/image")}
       >
-        <ImageDownIcon color="#4C4C4C" size={20} />
+        <ImageDownIcon className="text-primary-foreground" size={20} />
       </Button>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant={"primary"}
+            variant="primary"
             className="rounded-full p-0 w-[50px] h-[50px]"
           >
             <Image
@@ -130,8 +156,8 @@ export default function HeaderButtons() {
           <DropdownMenuItem>Profile</DropdownMenuItem>
           <DropdownMenuItem>
             <Button
-              variant="outline"
-              className="h-fit p-0 border-none m-0 w-fit bg-white"
+              variant="ghost"
+              className="w-full justify-start"
               onClick={() => router.push("/admin/create")}
             >
               Add new user

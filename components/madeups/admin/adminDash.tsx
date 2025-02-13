@@ -73,10 +73,12 @@ function AdminDash() {
     return (
       <>
         <div className="flex flex-col justify-evenly h-[70dvh]">
-          <h1 className="text-3xl text-card-foreground">
+          <h1 className="text-3xl text-primary">
             Welcome 👋
             <br />
-            <b className="text-4xl text-bold">Mr. {username}</b>
+            <b className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              Mr. {username}
+            </b>
             <Image
               src="/pen.png"
               alt="pen"
@@ -86,7 +88,7 @@ function AdminDash() {
             />
           </h1>
 
-          <div className="flex flex-col gap-[3dvh] w-full py-8 px-6 min-h-4 bg-white rounded-3xl">
+          <div className="flex flex-col gap-[3dvh] w-full py-8 px-6 min-h-4 bg-card/80 rounded-3xl shadow-lg border border-border/50 backdrop-blur-sm">
             <div className="w-full max-w-full flex">
               <div className="flex flex-row w-[30%]">
                 <div className="flex flex-row items-center justify-center">
@@ -103,17 +105,17 @@ function AdminDash() {
                 </div>
               </div>
               <Button
-                variant={"ghost"}
-                className="text-bold text-gray-400 w-[40%]"
+                variant="ghost"
+                className="font-bold text-muted-foreground w-[40%]"
               >
                 Manage Access
               </Button>
               <div className="flex flex-row gap-1 w-[30%] place-content-end">
-                <p className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-pink-500 rounded-full flex justify-center items-center">
-                  <SwatchBook color="white" />
+                <p className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex justify-center items-center shadow-md">
+                  <SwatchBook className="text-primary-foreground" />
                 </p>
-                <p className="w-10 h-10 bg-black rounded-full flex justify-center items-center">
-                  <Power color="white" />
+                <p className="w-10 h-10 bg-secondary rounded-full flex justify-center items-center shadow-md">
+                  <Power className="text-secondary-foreground" />
                 </p>
               </div>
             </div>
@@ -121,32 +123,31 @@ function AdminDash() {
             <div>
               <div className="h-full flex flex-row gap-8">
                 <div className="flex flex-1 flex-col gap-10">
-                  <div className="text-light text-xs leading-3 text-gray-400">
-                    <h1 className="text-3xl text-bold text-black var(--font-sf-ui-display-bold)">
-                      100 <span className="text-sm text-gray-400">hrs</span>
+                  <div className="text-light text-xs leading-3 text-muted-foreground">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                      100{" "}
+                      <span className="text-sm text-muted-foreground">hrs</span>
                     </h1>
                     Server up time
                   </div>
-                  <div className="text-light text-xs leading-3 text-gray-400">
-                    <h1 className="text-3xl text-bold text-black var(--font-sf-ui-display-bold)">
-                      {usersData.length}{" "}
-                      <span className="text-sm text-gray-400"></span>
+                  <div className="text-light text-xs leading-3 text-muted-foreground">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                      {usersData.length}
                     </h1>
                     Users with access
                   </div>
                 </div>
-                <div className="h-[140px] w-[2px] bg-gray-400"></div>
+                <div className="h-[140px] w-[2px] bg-accent/30"></div>
                 <div className="flex flex-1 flex-col gap-10">
-                  <div className="text-light text-xs leading-3 text-gray-400">
-                    <h1 className="text-3xl text-bold text-black var(--font-sf-ui-display-bold)">
-                      Good <span className="text-sm text-gray-400"></span>
+                  <div className="text-light text-xs leading-3 text-muted-foreground">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                      Good
                     </h1>
                     Api health status
                   </div>
-                  <div className="text-light text-xs leading-3 text-gray-400">
-                    <h1 className="text-3xl text-bold text-black var(--font-sf-ui-display-bold)">
+                  <div className="text-light text-xs leading-3 text-muted-foreground">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
                       {themeCount}
-                      <span className="text-sm text-gray-400"></span>
                     </h1>
                     Themes Available
                   </div>
@@ -154,14 +155,14 @@ function AdminDash() {
               </div>
             </div>
             <div className="flex gap-1">
-              <div className="h-[8px] w-[30%] bg-green-500 rounded-full"></div>
-              <div className="h-[8px] w-[20%] bg-teal-300 rounded-full"></div>
-              <div className="h-[8px] w-[20%] bg-gray-400 rounded-full"></div>
-              <div className="h-[8px] w-[30%] bg-gray-800 rounded-full"></div>
+              <div className="h-[8px] w-[30%] bg-gradient-to-r from-primary to-primary/80 rounded-full"></div>
+              <div className="h-[8px] w-[20%] bg-gradient-to-r from-accent to-accent/80 rounded-full"></div>
+              <div className="h-[8px] w-[20%] bg-secondary rounded-full"></div>
+              <div className="h-[8px] w-[30%] bg-muted rounded-full"></div>
             </div>
           </div>
           <Button
-            className="h-20 rounded-full"
+            className="h-20 rounded-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg"
             onClick={() => {
               router.push("/admin/preview");
             }}
@@ -171,8 +172,8 @@ function AdminDash() {
         </div>
 
         <SwipeButton
-          label="Swipe right for edits ---&gt;"
-          className="absolute bottom-8 w-[calc(100%-48px)] text-gray-400 h-20 rounded-full"
+          label="Swipe right for edits --->"
+          className="absolute bottom-8 w-[calc(100%-48px)] text-muted-foreground h-20 rounded-full bg-card shadow-lg border border-border/50"
           onSwipeRight={() => router.push("/admin/edit")}
           onSwipeLeft={() => console.log("Swiped left")}
         />

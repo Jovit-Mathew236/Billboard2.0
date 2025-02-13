@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import animatePlugin from "tailwindcss-animate";
 
 const config: Config = {
   darkMode: ["class"],
@@ -58,10 +59,15 @@ const config: Config = {
       },
       backgroundImage: {
         "gradient-custom":
-          "linear-gradient(90.27deg, #FF8878 9.83%, #994896 112.75%)",
+          "linear-gradient(90.27deg, hsl(var(--primary)) 9.83%, hsl(var(--accent)) 112.75%)",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [animatePlugin],
+  safelist: [
+    {
+      pattern: /^col-span-/,
+    },
+  ],
 };
 export default config;
