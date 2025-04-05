@@ -16,13 +16,13 @@ import {
   deleteDoc,
   doc,
   setDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import WeatherWidget from "@/components/weather-widget";
 import TimeWidget from "@/components/time-widget";
-import { v4 as uuidv4 } from "uuid";
 import { StaffPositions, NewsTickerBlock } from "@/lib/utils/renderBlock";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { Switch } from "@/components/ui/switch";
@@ -173,14 +173,21 @@ const SortableBlock = ({
   onDelete: (id: string) => void;
   theme: string | undefined;
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: block.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: block.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     touchAction: "none",
-    cursor: "grab",
+    zIndex: isDragging ? 1000 : 1,
+    opacity: isDragging ? 0.8 : 1,
   };
 
   return (
@@ -192,15 +199,19 @@ const SortableBlock = ({
         `col-span-${block.width}`,
         block.theme || theme,
         "touch-none",
-        "hover:border-2 hover:border-blue-500"
+        isDragging ? "border-2 border-blue-500 bg-blue-50" : "",
+        "hover:shadow-lg transition-shadow"
       )}
       {...attributes}
     >
       <div className="flex justify-between items-center mb-2">
-        <div {...listeners}>
-          <GripVertical className="cursor-move text-gray-400" />
+        <div
+          {...listeners}
+          className="p-2 -m-2 cursor-grab rounded hover:bg-gray-100 active:cursor-grabbing"
+        >
+          <GripVertical className="text-gray-500" />
         </div>
-        <h3 className="font-medium">{block.title}</h3>
+        <h3 className="font-medium truncate mx-2">{block.title}</h3>
         <div className="flex gap-2">
           <Button variant="ghost" size="sm" onClick={() => onEdit(block)}>
             <Edit2 className="h-4 w-4" />
@@ -210,7 +221,12 @@ const SortableBlock = ({
           </Button>
         </div>
       </div>
-      {renderBlockPreview(block)}
+      <div
+        className="overflow-hidden"
+        style={{ maxHeight: `${block.height - 50}px` }}
+      >
+        {renderBlockPreview(block)}
+      </div>
     </div>
   );
 };
@@ -226,7 +242,30 @@ const EditDashboard = () => {
     backgroundColor: "#000000",
     headerText: "Department of",
     title: "ELECTRONICS & COMPUTER ENGINEERING",
+    backgroundImageUrl: "",
+    backgroundS3Key: "",
   });
+
+  // Load global settings from Firebase
+  useEffect(() => {
+    const settingsRef = doc(db, "settings", "global");
+
+    const unsubscribe = onSnapshot(settingsRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const settingsData = docSnapshot.data();
+        setGlobalSettings((prev) => ({
+          ...prev,
+          backgroundColor: settingsData.backgroundColor || prev.backgroundColor,
+          headerText: settingsData.headerText || prev.headerText,
+          title: settingsData.title || prev.title,
+          backgroundImageUrl: settingsData.backgroundImageUrl || "",
+          backgroundS3Key: settingsData.backgroundS3Key || "",
+        }));
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Load saved blocks from localStorage/Firebase
   useEffect(() => {
@@ -246,7 +285,6 @@ const EditDashboard = () => {
   const addNewBlock = async (type: string) => {
     try {
       const newBlock = {
-        id: uuidv4(),
         type,
         title: `New ${type} Block`,
         width: 6,
@@ -264,7 +302,7 @@ const EditDashboard = () => {
             ...newBlock,
             content: "",
             textAlign: "left",
-          } as TextField;
+          } as Omit<TextField, "id">;
           break;
 
         case "list":
@@ -272,7 +310,7 @@ const EditDashboard = () => {
             ...newBlock,
             items: ["New item 1", "New item 2"],
             listStyle: "bullet",
-          } as ListField;
+          } as Omit<ListField, "id">;
           break;
 
         case "news":
@@ -281,7 +319,7 @@ const EditDashboard = () => {
             showNifty: true,
             backgroundColor: "#000000",
             textColor: "#ffffff",
-          } as NewsField;
+          } as Omit<NewsField, "id">;
           break;
 
         case "time":
@@ -289,7 +327,7 @@ const EditDashboard = () => {
             ...newBlock,
             format: "24h",
             showSeconds: true,
-          } as TimeField;
+          } as Omit<TimeField, "id">;
           break;
 
         case "staff":
@@ -298,7 +336,7 @@ const EditDashboard = () => {
             positions: [],
             backgroundColor: "#ffffff",
             textColor: "#000000",
-          } as StaffField;
+          } as Omit<StaffField, "id">;
           break;
 
         case "image":
@@ -306,7 +344,7 @@ const EditDashboard = () => {
             ...newBlock,
             type: "image",
             imageUrl: "",
-          } as ImageField;
+          } as Omit<ImageField, "id">;
           break;
 
         case "weather":
@@ -315,16 +353,21 @@ const EditDashboard = () => {
             type: "weather",
             location: "",
             unit: "celsius",
-          } as WeatherField;
+          } as Omit<WeatherField, "id">;
           break;
 
         default:
-          blockData = newBlock as ContentBlock;
+          blockData = newBlock as Omit<ContentBlock, "id">;
       }
 
       // Add to Firebase
       const docRef = await addDoc(collection(db, "blocks"), blockData);
-      const blockWithId = { ...blockData, id: docRef.id };
+
+      // Now use Firebase's document ID for the block
+      const blockWithId = {
+        ...blockData,
+        id: docRef.id,
+      } as ContentBlock;
 
       // Update local state
       setBlocks([...blocks, blockWithId]);
@@ -401,9 +444,13 @@ const EditDashboard = () => {
     }
   };
 
-  // Add these sensors
+  // Update the PointerSensor configuration for better mobile support
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement required before activating drag
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -418,13 +465,28 @@ const EditDashboard = () => {
         const oldIndex = blocks.findIndex((block) => block.id === active.id);
         const newIndex = blocks.findIndex((block) => block.id === over.id);
 
+        // Create new array with updated positions
         const newBlocks = arrayMove(blocks, oldIndex, newIndex);
 
-        // Update positions in Firebase
-        newBlocks.forEach(async (block, index) => {
-          const blockRef = doc(db, "blocks", block.id);
-          await setDoc(blockRef, { position: index }, { merge: true });
-        });
+        // Update positions in Firebase - one by one to ensure we update the correct document
+        (async () => {
+          try {
+            // Process each update sequentially to avoid race conditions
+            for (let i = 0; i < newBlocks.length; i++) {
+              const block = newBlocks[i];
+              console.log(`Updating block ${block.id} to position ${i}`);
+
+              // Get reference to the exact document by ID
+              const blockRef = doc(db, "blocks", block.id);
+
+              // Only update the position field
+              await setDoc(blockRef, { position: i }, { merge: true });
+            }
+            console.log("All positions updated successfully");
+          } catch (error) {
+            console.error("Error updating positions:", error);
+          }
+        })();
 
         return newBlocks;
       });
@@ -437,6 +499,83 @@ const EditDashboard = () => {
       await setDoc(settingsRef, globalSettings);
     } catch (error) {
       console.error("Error updating settings:", error);
+    }
+  };
+
+  // Add a function to handle background image upload
+  const uploadBackgroundImage = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = async () => {
+      try {
+        const base64String = reader.result as string;
+
+        const response = await fetch("/api/upload-background", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ image: base64String }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Update local state
+          setGlobalSettings({
+            ...globalSettings,
+            backgroundImageUrl: data.backgroundImageUrl,
+            backgroundS3Key: data.backgroundS3Key,
+          });
+
+          // Show success message
+          alert("Background image uploaded successfully!");
+        } else {
+          console.error("Upload failed:", data.message);
+          alert("Failed to upload background image");
+        }
+      } catch (error) {
+        console.error("Error uploading background image:", error);
+        alert("Error uploading background image");
+      }
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  // Add a function to remove background image
+  const removeBackgroundImage = async () => {
+    if (!globalSettings.backgroundImageUrl) return;
+
+    try {
+      const response = await fetch("/api/upload-background", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          s3Key: globalSettings.backgroundS3Key || "",
+        }),
+      });
+
+      if (response.ok) {
+        setGlobalSettings({
+          ...globalSettings,
+          backgroundImageUrl: "",
+          backgroundS3Key: "",
+        });
+        alert("Background image removed successfully!");
+      } else {
+        alert("Failed to remove background image");
+      }
+    } catch (error) {
+      console.error("Error removing background image:", error);
+      alert("Error removing background image");
     }
   };
 
@@ -493,7 +632,7 @@ const EditDashboard = () => {
               <Plus />
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] w-10/12 text-black rounded-lg bg-white">
+          <DialogContent className="sm:max-w-[425px] w-10/12 text-black rounded-lg bg-white  overflow-auto h-[90vh]">
             <div className="mb-6 pb-6 border-b">
               <h3 className="text-lg font-semibold mb-4">Display Settings</h3>
               <div className="space-y-4">
@@ -508,6 +647,40 @@ const EditDashboard = () => {
                       })
                     }
                   />
+                </div>
+
+                <div>
+                  <Label>Background Image</Label>
+                  <div className="mt-2 flex flex-col gap-2">
+                    {globalSettings.backgroundImageUrl && (
+                      <div className="relative w-full h-40 mb-2">
+                        <Image
+                          src={globalSettings.backgroundImageUrl}
+                          alt="Background Preview"
+                          fill
+                          className="object-cover rounded-md"
+                        />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2 opacity-80"
+                          onClick={removeBackgroundImage}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={uploadBackgroundImage}
+                      className="cursor-pointer"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Recommended: High resolution image for 4K display
+                    </p>
+                  </div>
                 </div>
 
                 <div>

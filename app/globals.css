@@ -60,6 +60,82 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .display-layout {
+
+    /* 4K optimized display styles */
+    .rounded-lg {
+      border-radius: 5rem;
+    }
+  }
+
+  /* Increased heading sizes for 4K display */
+  .display-layout h1 {
+    font-size: 5rem !important;
+    /* ~80px */
+    line-height: 1.1 !important;
+    font-weight: 800 !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .display-layout h2 {
+    font-size: 4rem !important;
+    /* ~64px */
+    line-height: 1.1 !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .display-layout h3 {
+    font-size: 3.5rem !important;
+    /* ~56px */
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .display-layout h4 {
+    font-size: 3rem !important;
+    /* ~48px */
+    line-height: 1.2 !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .display-layout h5 {
+    font-size: 2.5rem !important;
+    /* ~40px */
+    line-height: 1.3 !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .display-layout h6 {
+    font-size: 2rem !important;
+    /* ~32px */
+    line-height: 1.3 !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Increased paragraph and other text for 4K display */
+  .display-layout p,
+  .display-layout li,
+  .display-layout a {
+    font-size: 1.75rem !important;
+    /* ~28px */
+    line-height: 1.6 !important;
+  }
+
+  /* Make sure block content gets the font size too */
+  .display-layout .text-3xl,
+  .display-layout .text-4xl {
+    font-size: 2rem !important;
+  }
+
+  .display-layout li {
+    font-size: 3.75rem !important;
+  }
 }
 
 .content-block {
