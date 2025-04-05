@@ -84,7 +84,7 @@ export default function DisplayLayout() {
         </div>
 
         {/* Optimized content grid for 4K */}
-        <div className="grid grid-cols-12 gap-10 px-12 pb-16 flex-1 relative z-10">
+        <div className="grid grid-cols-12 gap-10 px-12 pb-16 relative z-10">
           {blocks.map((block) => (
             <div
               key={block.id}
@@ -104,7 +104,9 @@ export default function DisplayLayout() {
             >
               <div className="p-10 flex-1 overflow-auto">
                 {/* Larger text for 4K display */}
-                <div className="text-5xl font-medium">{renderBlock(block)}</div>
+                <div className="text-5xl font-medium h-full w-full">
+                  {renderBlock(block)}
+                </div>
               </div>
             </div>
           ))}

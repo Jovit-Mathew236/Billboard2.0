@@ -61,6 +61,11 @@
     @apply bg-background text-foreground;
   }
 
+  .edit-dashboard-block .text-6xl {
+    font-size: 3rem !important;
+  }
+
+
   .display-layout {
 
     /* 4K optimized display styles */
@@ -128,9 +133,47 @@
   }
 
   /* Make sure block content gets the font size too */
-  .display-layout .text-3xl,
+  .display-layout .text-3xl {
+    font-size: 3rem !important;
+  }
+
   .display-layout .text-4xl {
-    font-size: 2rem !important;
+    font-size: 4rem !important;
+  }
+
+  .display-layout .text-6xl {
+    font-size: 6rem !important;
+  }
+
+  /* Table styles for 4K display */
+  .display-layout table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    border-radius: 1rem !important;
+    overflow: hidden !important;
+  }
+
+  .display-layout table tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.03) !important;
+  }
+
+  .display-layout th {
+    font-size: 3.5rem !important;
+    padding: 2rem !important;
+    font-weight: 700 !important;
+    text-align: left;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.07);
+    vertical-align: middle !important;
+  }
+
+  .display-layout td {
+    font-size: 3rem !important;
+    padding: 1.75rem 2rem !important;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    vertical-align: middle !important;
   }
 
   .display-layout li {

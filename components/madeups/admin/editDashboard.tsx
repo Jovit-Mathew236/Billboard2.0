@@ -104,6 +104,13 @@ interface StaffField extends BaseField {
 interface NewsField extends BaseField {
   type: "news";
   showNifty?: boolean;
+  showWeather?: boolean;
+}
+
+interface TableField extends BaseField {
+  type: "table";
+  headers: string[];
+  rows: string; // JSON stringified array of string arrays
 }
 
 type ContentBlock =
@@ -113,7 +120,8 @@ type ContentBlock =
   | WeatherField
   | TimeField
   | StaffField
-  | NewsField;
+  | NewsField
+  | TableField;
 
 // Move renderBlockPreview before SortableBlock
 const renderBlockPreview = (block: ContentBlock) => {
@@ -146,6 +154,40 @@ const renderBlockPreview = (block: ContentBlock) => {
           {listBlock.items?.map((item, index) => <li key={index}>{item}</li>) ||
             []}
         </ul>
+      );
+    case "table":
+      const tableBlock = block as TableField;
+      let parsedRows: string[][] = [];
+      try {
+        parsedRows = JSON.parse(tableBlock.rows);
+      } catch (error) {
+        console.error("Error parsing table rows:", error);
+      }
+      return (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                {tableBlock.headers.map((header, index) => (
+                  <th key={index} className="border p-2 text-left">
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {parsedRows.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {row.map((cell, cellIndex) => (
+                    <td key={cellIndex} className="border p-2">
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       );
     case "weather":
       return <WeatherWidget location={block.location} unit={block.unit} />;
@@ -195,7 +237,7 @@ const SortableBlock = ({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "content-block relative rounded-lg shadow-md p-4",
+        "content-block relative rounded-lg shadow-md p-4 edit-dashboard-block",
         `col-span-${block.width}`,
         block.theme || theme,
         "touch-none",
@@ -317,6 +359,7 @@ const EditDashboard = () => {
           blockData = {
             ...newBlock,
             showNifty: true,
+            showWeather: true,
             backgroundColor: "#000000",
             textColor: "#ffffff",
           } as Omit<NewsField, "id">;
@@ -354,6 +397,20 @@ const EditDashboard = () => {
             location: "",
             unit: "celsius",
           } as Omit<WeatherField, "id">;
+          break;
+
+        case "table":
+          blockData = {
+            ...newBlock,
+            type: "table",
+            headers: ["Header 1", "Header 2", "Header 3"],
+            rows: JSON.stringify([
+              ["Cell 1,1", "Cell 1,2", "Cell 1,3"],
+              ["Cell 2,1", "Cell 2,2", "Cell 2,3"],
+            ]),
+            backgroundColor: "#ffffff",
+            textColor: "#000000",
+          } as Omit<TableField, "id">;
           break;
 
         default:
@@ -409,6 +466,13 @@ const EditDashboard = () => {
         case "news":
           Object.assign(blockData, {
             showNifty: (updatedBlock as NewsField).showNifty,
+            showWeather: (updatedBlock as NewsField).showWeather,
+          });
+          break;
+        case "table":
+          Object.assign(blockData, {
+            headers: (updatedBlock as TableField).headers || [],
+            rows: (updatedBlock as TableField).rows || "[]",
           });
           break;
         // Add other cases as needed
@@ -582,7 +646,7 @@ const EditDashboard = () => {
   return (
     <div className="min-h-screen pb-32">
       {/* Billboard Preview - 9:16 aspect ratio */}
-      <div className="w-full aspect-[9/16] bg-gray-100 rounded-lg mb-8 overflow-hidden">
+      <div className="w-full aspect-[9/16] bg-gray-100 rounded-lg mb-8 overflow-auto">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -726,6 +790,7 @@ const EditDashboard = () => {
               <Button onClick={() => addNewBlock("time")}>Time Block</Button>
               <Button onClick={() => addNewBlock("staff")}>Staff Block</Button>
               <Button onClick={() => addNewBlock("news")}>News Block</Button>
+              <Button onClick={() => addNewBlock("table")}>Table Block</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -733,7 +798,7 @@ const EditDashboard = () => {
 
       {/* Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] overflow-auto h-[90vh]">
           {editingBlock && (
             <div className="space-y-4">
               <div>
@@ -886,17 +951,31 @@ const EditDashboard = () => {
 
               {/* Block-specific controls */}
               {editingBlock.type === "news" && (
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={editingBlock.showNifty}
-                    onCheckedChange={(checked: boolean) =>
-                      setEditingBlock({
-                        ...editingBlock,
-                        showNifty: checked,
-                      } as NewsField)
-                    }
-                  />
-                  <Label>Show NIFTY50</Label>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={editingBlock.showNifty}
+                      onCheckedChange={(checked: boolean) =>
+                        setEditingBlock({
+                          ...editingBlock,
+                          showNifty: checked,
+                        } as NewsField)
+                      }
+                    />
+                    <Label>Show NIFTY50</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={(editingBlock as NewsField).showWeather || false}
+                      onCheckedChange={(checked: boolean) =>
+                        setEditingBlock({
+                          ...editingBlock,
+                          showWeather: checked,
+                        } as NewsField)
+                      }
+                    />
+                    <Label>Show Weather</Label>
+                  </div>
                 </div>
               )}
 
@@ -970,6 +1049,294 @@ const EditDashboard = () => {
                         <SelectItem value="none">None</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+              )}
+
+              {editingBlock.type === "table" && (
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-3 rounded-md">
+                    <h4 className="font-medium mb-2">Table Dimensions</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Columns</Label>
+                        <div className="flex gap-2 items-center mt-1">
+                          <Input
+                            type="number"
+                            min={1}
+                            max={12}
+                            value={(editingBlock as TableField).headers.length}
+                            onChange={(e) => {
+                              const newColumnCount = parseInt(e.target.value);
+                              const currentCount = (editingBlock as TableField)
+                                .headers.length;
+
+                              // Parse current rows
+                              let parsedRows: string[][] = [];
+                              try {
+                                parsedRows = JSON.parse(
+                                  (editingBlock as TableField).rows
+                                );
+                              } catch (error) {
+                                console.error("Error parsing rows:", error);
+                                parsedRows = [];
+                              }
+
+                              if (newColumnCount > currentCount) {
+                                // Add columns
+                                const newHeaders = [
+                                  ...(editingBlock as TableField).headers,
+                                ];
+
+                                for (
+                                  let i = currentCount;
+                                  i < newColumnCount;
+                                  i++
+                                ) {
+                                  newHeaders.push(`Header ${i + 1}`);
+                                  // Add new cell to each existing row
+                                  parsedRows.forEach((row) =>
+                                    row.push(`Cell ${row.length + 1}`)
+                                  );
+                                }
+
+                                setEditingBlock({
+                                  ...editingBlock,
+                                  headers: newHeaders,
+                                  rows: JSON.stringify(parsedRows),
+                                } as TableField);
+                              } else if (
+                                newColumnCount < currentCount &&
+                                newColumnCount >= 1
+                              ) {
+                                // Remove columns
+                                const newHeaders = (
+                                  editingBlock as TableField
+                                ).headers.slice(0, newColumnCount);
+                                const newRows = parsedRows.map((row) =>
+                                  row.slice(0, newColumnCount)
+                                );
+
+                                setEditingBlock({
+                                  ...editingBlock,
+                                  headers: newHeaders,
+                                  rows: JSON.stringify(newRows),
+                                } as TableField);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Rows</Label>
+                        <div className="flex gap-2 items-center mt-1">
+                          <Input
+                            type="number"
+                            min={1}
+                            max={20}
+                            value={(() => {
+                              try {
+                                return JSON.parse(
+                                  (editingBlock as TableField).rows
+                                ).length;
+                              } catch (error) {
+                                console.log(error);
+
+                                return 0;
+                              }
+                            })()}
+                            onChange={(e) => {
+                              const newRowCount = parseInt(e.target.value);
+
+                              // Parse current rows
+                              let parsedRows: string[][] = [];
+                              try {
+                                parsedRows = JSON.parse(
+                                  (editingBlock as TableField).rows
+                                );
+                              } catch (error) {
+                                console.error("Error parsing rows:", error);
+                                parsedRows = [];
+                              }
+
+                              const currentRowCount = parsedRows.length;
+                              const columnCount = (editingBlock as TableField)
+                                .headers.length;
+
+                              if (newRowCount > currentRowCount) {
+                                // Add rows
+                                const newRows = [...parsedRows];
+
+                                for (
+                                  let i = currentRowCount;
+                                  i < newRowCount;
+                                  i++
+                                ) {
+                                  // Create new row with empty cells for each column
+                                  const newRow = Array(columnCount)
+                                    .fill("")
+                                    .map(
+                                      (_, colIndex) =>
+                                        `Cell ${i + 1},${colIndex + 1}`
+                                    );
+                                  newRows.push(newRow);
+                                }
+
+                                setEditingBlock({
+                                  ...editingBlock,
+                                  rows: JSON.stringify(newRows),
+                                } as TableField);
+                              } else if (
+                                newRowCount < currentRowCount &&
+                                newRowCount >= 1
+                              ) {
+                                // Remove rows
+                                const newRows = parsedRows.slice(
+                                  0,
+                                  newRowCount
+                                );
+
+                                setEditingBlock({
+                                  ...editingBlock,
+                                  rows: JSON.stringify(newRows),
+                                } as TableField);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Headers</Label>
+                    <div className="grid grid-cols-1 gap-2 mt-2">
+                      <div className="flex flex-wrap gap-2">
+                        {(editingBlock as TableField).headers.map(
+                          (header, index) => (
+                            <div
+                              key={index}
+                              className="flex gap-1 items-center"
+                            >
+                              <Input
+                                value={header}
+                                onChange={(e) => {
+                                  const newHeaders = [
+                                    ...(editingBlock as TableField).headers,
+                                  ];
+                                  newHeaders[index] = e.target.value;
+                                  setEditingBlock({
+                                    ...editingBlock,
+                                    headers: newHeaders,
+                                  } as TableField);
+                                }}
+                                className="w-[120px]"
+                              />
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-3 rounded-md">
+                    <div className="flex justify-between items-center mb-3">
+                      <Label>Table Data</Label>
+                    </div>
+                    <div className="overflow-x-auto border rounded">
+                      <table className="w-full border-collapse">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="border p-2 text-center w-12">#</th>
+                            {(editingBlock as TableField).headers.map(
+                              (header, index) => (
+                                <th
+                                  key={index}
+                                  className="border p-2 text-center"
+                                >
+                                  {header}
+                                </th>
+                              )
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(() => {
+                            try {
+                              const parsedRows = JSON.parse(
+                                (editingBlock as TableField).rows
+                              );
+                              return parsedRows.map(
+                                (row: string[], rowIndex: number) => (
+                                  <tr key={rowIndex}>
+                                    <td className="border p-2 text-center font-medium">
+                                      {rowIndex + 1}
+                                    </td>
+                                    {row.map(
+                                      (cell: string, cellIndex: number) => (
+                                        <td
+                                          key={cellIndex}
+                                          className="border p-1"
+                                        >
+                                          <Input
+                                            value={cell}
+                                            onChange={(e) => {
+                                              try {
+                                                const parsedRows = JSON.parse(
+                                                  (editingBlock as TableField)
+                                                    .rows
+                                                );
+                                                parsedRows[rowIndex][
+                                                  cellIndex
+                                                ] = e.target.value;
+                                                setEditingBlock({
+                                                  ...editingBlock,
+                                                  rows: JSON.stringify(
+                                                    parsedRows
+                                                  ),
+                                                } as TableField);
+                                              } catch (error) {
+                                                console.error(
+                                                  "Error updating cell:",
+                                                  error
+                                                );
+                                              }
+                                            }}
+                                            className="border-0 focus:ring-0"
+                                          />
+                                        </td>
+                                      )
+                                    )}
+                                  </tr>
+                                )
+                              );
+                            } catch (error) {
+                              console.error(
+                                "Error rendering table data:",
+                                error
+                              );
+                              return (
+                                <tr>
+                                  <td
+                                    colSpan={
+                                      (editingBlock as TableField).headers
+                                        .length + 1
+                                    }
+                                    className="border p-2"
+                                  >
+                                    Error loading table data
+                                  </td>
+                                </tr>
+                              );
+                            }
+                          })()}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-500">
+                      Note: Adjust table dimensions first, then edit content as
+                      needed.
+                    </div>
                   </div>
                 </div>
               )}

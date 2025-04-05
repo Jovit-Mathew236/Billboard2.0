@@ -9,7 +9,8 @@ export interface ContentBlock {
     | "staff"
     | "news"
     | "marquee"
-    | "list";
+    | "list"
+    | "table";
   title: string;
   width: number;
   height: number;
@@ -54,6 +55,7 @@ export interface StaffField extends ContentBlock {
 export interface NewsField extends ContentBlock {
   type: "news";
   showNifty?: boolean;
+  showWeather?: boolean;
 }
 
 export interface MarqueeField extends ContentBlock {
@@ -65,4 +67,10 @@ export interface ListField extends ContentBlock {
   type: "list";
   items: string[];
   listStyle?: "bullet" | "number" | "none";
+}
+
+export interface TableField extends ContentBlock {
+  type: "table";
+  headers: string[];
+  rows: string; // JSON stringified array of string arrays
 }
