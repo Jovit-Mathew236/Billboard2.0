@@ -77,7 +77,7 @@ export default function DisplayLayout() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        transform: "rotate(170deg)",
+        transform: "rotate(270deg)",
       }}
     >
       {/* Optimized container for 4K (3840×2160 in portrait mode) */}
