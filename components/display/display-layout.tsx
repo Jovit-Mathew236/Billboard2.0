@@ -83,38 +83,30 @@ export default function DisplayLayout() {
       }}
     >
       {/* Optimized container for 4K (3840×2160 in portrait mode) */}
-      <div className="w-full h-full max-w-[2160px] max-h-[3840px] flex flex-col p-16">
-        {" "}
-        {/* Added padding */}
+      <div className="w-full h-full max-w-[2160px] max-h-[3840px] flex flex-col">
         {/* Semi-transparent overlay for better text contrast */}
         {settings.backgroundImageUrl && (
           <div className="absolute inset-0 bg-black bg-opacity-50 pointer-events-none" />
         )}
+
         {/* Enhanced header section for 4K */}
-        <div className="text-center py-16 relative z-10">
-          {" "}
-          {/* Increased padding */}
-          <p className="text-7xl font-light text-white/90 mb-8">
-            {" "}
-            {/* Increased text size and margin */}
+        <div className="text-center py-12 relative z-10">
+          <p className="text-6xl font-light text-white/90 mb-4">
             {settings.headerText}
           </p>
-          <h1 className="text-9xl font-bold text-white whitespace-pre-line leading-tight tracking-tight">
-            {" "}
-            {/* Increased text size */}
+          <h1 className="text-8xl font-bold text-white whitespace-pre-line leading-tight tracking-tight">
             {settings.title}
           </h1>
         </div>
+
         {/* Optimized content grid for 4K */}
-        <div className="flex-1 px-16 pb-20 relative z-10">
-          {" "}
-          {/* Increased padding */}
+        <div className="flex-1 px-12 pb-16 relative z-10">
           <div
             className="grid w-full h-full"
             style={{
               gridTemplateColumns: "repeat(12, 1fr)",
               gridTemplateRows: "repeat(12, 1fr)",
-              gap: "3rem", // Increased gap
+              gap: "2rem",
             }}
           >
             {blocks.map((block) => {
@@ -143,16 +135,12 @@ export default function DisplayLayout() {
               return (
                 <div
                   key={block.id}
-                  className="rounded-2xl shadow-2xl overflow-hidden" // Increased border radius
+                  className="rounded-lg shadow-2xl overflow-hidden"
                   style={blockStyle}
                 >
-                  <div className="p-12 flex-1 overflow-auto">
-                    {" "}
-                    {/* Increased padding */}
+                  <div className="p-10 flex-1 overflow-auto">
                     {/* Larger text for 4K display */}
-                    <div className="text-6xl font-medium h-full w-full">
-                      {" "}
-                      {/* Increased text size */}
+                    <div className="text-5xl font-medium h-full w-full">
                       {renderBlock(block)}
                     </div>
                   </div>
