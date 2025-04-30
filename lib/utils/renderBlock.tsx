@@ -8,6 +8,7 @@ import {
   NewsField,
   ListField,
   TableField,
+  CarouselField,
 } from "@/types/blocks";
 import Image from "next/image";
 import WeatherWidget from "@/components/weather-widget";
@@ -168,6 +169,9 @@ export function renderBlock(block: ContentBlock) {
           </div>
         </div>
       );
+
+    case "carousel":
+      return <ImageCarouselBlock block={block as CarouselField} />;
 
     default:
       return <div>Unsupported block type</div>;
@@ -370,6 +374,95 @@ export function NewsTickerBlock({ block }: { block: NewsField }) {
             <p className="text-xl">Loading data...</p>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// Image Carousel Component
+export function ImageCarouselBlock({ block }: { block: CarouselField }) {
+  const [images, setImages] = useState<Array<{ id: string; imageUrl: string }>>(
+    []
+  );
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch images from Firebase
+  useEffect(() => {
+    const imagesRef = collection(db, "images");
+    const q = query(imagesRef);
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const imageData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        imageUrl: doc.data().imageUrl,
+      }));
+      setImages(imageData);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Rotate through images
+  useEffect(() => {
+    if (images.length === 0) return;
+
+    const interval = block.transitionInterval || 5000; // Default to 5 seconds
+    const intervalId = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, interval);
+
+    return () => clearInterval(intervalId);
+  }, [images.length, block.transitionInterval]);
+
+  if (loading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        Loading images...
+      </div>
+    );
+  }
+
+  if (images.length === 0) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        No images available
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-full relative overflow-hidden rounded-lg">
+      {images.map((image, index) => (
+        <div
+          key={image.id}
+          className="absolute inset-0 w-full h-full transition-opacity duration-1000"
+          style={{
+            opacity: index === currentImageIndex ? 1 : 0,
+            zIndex: index === currentImageIndex ? 1 : 0,
+          }}
+        >
+          <Image
+            src={image.imageUrl}
+            alt={`Slide ${index + 1}`}
+            fill
+            className="object-cover"
+            priority={index === currentImageIndex}
+          />
+        </div>
+      ))}
+
+      {/* Pagination dots */}
+      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
+        {images.map((_, index) => (
+          <div
+            key={index}
+            className={`h-3 w-3 rounded-full ${
+              index === currentImageIndex ? "bg-white" : "bg-white/50"
+            }`}
+          />
+        ))}
       </div>
     </div>
   );

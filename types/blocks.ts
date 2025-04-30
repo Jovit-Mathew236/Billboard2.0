@@ -10,7 +10,8 @@ export interface ContentBlock {
     | "news"
     | "marquee"
     | "list"
-    | "table";
+    | "table"
+    | "carousel";
   title: string;
   width: number;
   height: number;
@@ -73,4 +74,9 @@ export interface TableField extends ContentBlock {
   type: "table";
   headers: string[];
   rows: string; // JSON stringified array of string arrays
+}
+
+export interface CarouselField extends ContentBlock {
+  type: "carousel";
+  transitionInterval?: number; // in milliseconds, defaults to 5000 (5 seconds)
 }

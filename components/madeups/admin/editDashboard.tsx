@@ -17,6 +17,8 @@ import {
   doc,
   setDoc,
   onSnapshot,
+  query,
+  orderBy,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useTheme } from "next-themes";
@@ -113,6 +115,11 @@ interface TableField extends BaseField {
   rows: string; // JSON stringified array of string arrays
 }
 
+interface CarouselField extends BaseField {
+  type: "carousel";
+  transitionInterval: number;
+}
+
 type ContentBlock =
   | TextField
   | ImageField
@@ -121,7 +128,8 @@ type ContentBlock =
   | TimeField
   | StaffField
   | NewsField
-  | TableField;
+  | TableField
+  | CarouselField;
 
 // Move renderBlockPreview before SortableBlock
 const renderBlockPreview = (block: ContentBlock) => {
@@ -199,6 +207,8 @@ const renderBlockPreview = (block: ContentBlock) => {
       return <StaffPositions block={block as StaffField} />;
     case "news":
       return <NewsTickerBlock block={block as NewsField} />;
+    case "carousel":
+      return <div>Carousel content</div>;
     default:
       return null;
   }
@@ -313,11 +323,20 @@ const EditDashboard = () => {
   useEffect(() => {
     const fetchBlocks = async () => {
       const blocksCollection = collection(db, "blocks");
-      const blocksSnapshot = await getDocs(blocksCollection);
+      const q = query(blocksCollection, orderBy("position", "asc"));
+      const blocksSnapshot = await getDocs(q);
       const blocksList = blocksSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as ContentBlock[];
+
+      // Sort by position
+      blocksList.sort((a, b) => {
+        const posA = a.position !== undefined ? a.position : 999;
+        const posB = b.position !== undefined ? b.position : 999;
+        return posA - posB;
+      });
+
       setBlocks(blocksList);
     };
 
@@ -326,13 +345,20 @@ const EditDashboard = () => {
 
   const addNewBlock = async (type: string) => {
     try {
+      // Get the highest position value from existing blocks
+      const maxPosition = blocks.reduce((max, block) => {
+        return block.position !== undefined && block.position > max
+          ? block.position
+          : max;
+      }, -1);
+
       const newBlock = {
         type,
         title: `New ${type} Block`,
         width: 6,
         height: 200,
         theme: "light",
-        position: blocks.length,
+        position: maxPosition + 1, // Set the position to the next available
         backgroundColor: "#ffffff",
         textColor: "#000000",
       };
@@ -413,6 +439,16 @@ const EditDashboard = () => {
           } as Omit<TableField, "id">;
           break;
 
+        case "carousel":
+          blockData = {
+            ...newBlock,
+            type: "carousel",
+            transitionInterval: 5000, // 5 seconds default
+            backgroundColor: "#000000",
+            textColor: "#ffffff",
+          } as Omit<CarouselField, "id">;
+          break;
+
         default:
           blockData = newBlock as Omit<ContentBlock, "id">;
       }
@@ -475,6 +511,12 @@ const EditDashboard = () => {
             rows: (updatedBlock as TableField).rows || "[]",
           });
           break;
+        case "carousel":
+          Object.assign(blockData, {
+            transitionInterval:
+              (updatedBlock as CarouselField).transitionInterval || 5000,
+          });
+          break;
         // Add other cases as needed
       }
 
@@ -501,8 +543,54 @@ const EditDashboard = () => {
 
   const deleteBlock = async (id: string) => {
     try {
+      // Get the block to be deleted
+      const blockToDelete = blocks.find((block) => block.id === id);
+      if (!blockToDelete || blockToDelete.position === undefined) {
+        await deleteDoc(doc(db, "blocks", id));
+        setBlocks(blocks.filter((block) => block.id !== id));
+        return;
+      }
+
+      // Store position value in a local constant
+      const deletedPosition = blockToDelete.position;
+
+      // Delete the block
       await deleteDoc(doc(db, "blocks", id));
-      setBlocks(blocks.filter((block) => block.id !== id));
+
+      // Get remaining blocks that need position updates
+      const remainingBlocks = blocks.filter(
+        (block) =>
+          block.id !== id &&
+          block.position !== undefined &&
+          block.position > deletedPosition
+      );
+
+      // Update positions of blocks that came after the deleted one
+      const updatePromises = remainingBlocks.map((block) => {
+        const blockRef = doc(db, "blocks", block.id);
+        const newPosition = (block.position || 0) - 1;
+        return setDoc(blockRef, { position: newPosition }, { merge: true });
+      });
+
+      // Wait for all updates to complete
+      await Promise.all(updatePromises);
+
+      // Update local state
+      setBlocks((prevBlocks) => {
+        // Remove the deleted block
+        const filteredBlocks = prevBlocks.filter((block) => block.id !== id);
+
+        // Update positions
+        return filteredBlocks.map((block) => {
+          if (
+            block.position !== undefined &&
+            block.position > deletedPosition
+          ) {
+            return { ...block, position: block.position - 1 };
+          }
+          return block;
+        });
+      });
     } catch (error) {
       console.error("Error deleting block:", error);
     }
@@ -525,34 +613,40 @@ const EditDashboard = () => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      setBlocks((blocks) => {
-        const oldIndex = blocks.findIndex((block) => block.id === active.id);
-        const newIndex = blocks.findIndex((block) => block.id === over.id);
+      setBlocks((prevBlocks) => {
+        const oldIndex = prevBlocks.findIndex(
+          (block) => block.id === active.id
+        );
+        const newIndex = prevBlocks.findIndex((block) => block.id === over.id);
 
         // Create new array with updated positions
-        const newBlocks = arrayMove(blocks, oldIndex, newIndex);
+        const newBlocks = arrayMove(prevBlocks, oldIndex, newIndex);
 
-        // Update positions in Firebase - one by one to ensure we update the correct document
+        // Assign sequential positions
+        const blocksWithUpdatedPositions = newBlocks.map((block, index) => ({
+          ...block,
+          position: index,
+        }));
+
+        // Update positions in Firebase - batch updates for better performance
         (async () => {
           try {
-            // Process each update sequentially to avoid race conditions
-            for (let i = 0; i < newBlocks.length; i++) {
-              const block = newBlocks[i];
-              console.log(`Updating block ${block.id} to position ${i}`);
+            // Process each update
+            const updatePromises = blocksWithUpdatedPositions.map(
+              (block, index) => {
+                const blockRef = doc(db, "blocks", block.id);
+                return setDoc(blockRef, { position: index }, { merge: true });
+              }
+            );
 
-              // Get reference to the exact document by ID
-              const blockRef = doc(db, "blocks", block.id);
-
-              // Only update the position field
-              await setDoc(blockRef, { position: i }, { merge: true });
-            }
+            await Promise.all(updatePromises);
             console.log("All positions updated successfully");
           } catch (error) {
             console.error("Error updating positions:", error);
           }
         })();
 
-        return newBlocks;
+        return blocksWithUpdatedPositions;
       });
     }
   };
@@ -791,6 +885,9 @@ const EditDashboard = () => {
               <Button onClick={() => addNewBlock("staff")}>Staff Block</Button>
               <Button onClick={() => addNewBlock("news")}>News Block</Button>
               <Button onClick={() => addNewBlock("table")}>Table Block</Button>
+              <Button onClick={() => addNewBlock("carousel")}>
+                Carousel Block
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -1337,6 +1434,50 @@ const EditDashboard = () => {
                       Note: Adjust table dimensions first, then edit content as
                       needed.
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {editingBlock.type === "carousel" && (
+                <div className="space-y-4">
+                  <div>
+                    <Label>Transition Interval (ms)</Label>
+                    <Input
+                      type="number"
+                      min={1000}
+                      max={15000}
+                      step={500}
+                      value={
+                        (editingBlock as CarouselField).transitionInterval ||
+                        5000
+                      }
+                      onChange={(e) =>
+                        setEditingBlock({
+                          ...editingBlock,
+                          transitionInterval: parseInt(e.target.value),
+                        } as CarouselField)
+                      }
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Interval between image transitions (1000ms = 1 second)
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <h4 className="font-medium mb-2">Image Preview</h4>
+                    <p className="text-sm text-gray-600 mb-2">
+                      Images are loaded from the Images section. To add or
+                      remove images, go to the Images management.
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        window.open("/admin/edit/images", "_blank")
+                      }
+                      className="w-full"
+                    >
+                      Manage Images
+                    </Button>
                   </div>
                 </div>
               )}
