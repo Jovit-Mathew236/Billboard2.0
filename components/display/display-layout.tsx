@@ -78,29 +78,37 @@ export default function DisplayLayout() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        transform: "rotate(270deg) scale(1.78)", // Scale to match 16:9 aspect ratio
+        transform: "rotate(270deg)", // Scale to match 16:9 aspect ratio
         transformOrigin: "center center",
       }}
     >
       {/* Optimized container for 4K (3840×2160 in portrait mode) */}
-      <div className="w-full h-full max-w-[2160px] max-h-[3840px] flex flex-col p-16"> {/* Added padding */}
+      <div className="w-full h-full max-w-[2160px] max-h-[3840px] flex flex-col p-16">
+        {" "}
+        {/* Added padding */}
         {/* Semi-transparent overlay for better text contrast */}
         {settings.backgroundImageUrl && (
           <div className="absolute inset-0 bg-black bg-opacity-50 pointer-events-none" />
         )}
-
         {/* Enhanced header section for 4K */}
-        <div className="text-center py-16 relative z-10"> {/* Increased padding */}
-          <p className="text-7xl font-light text-white/90 mb-8"> {/* Increased text size and margin */}
+        <div className="text-center py-16 relative z-10">
+          {" "}
+          {/* Increased padding */}
+          <p className="text-7xl font-light text-white/90 mb-8">
+            {" "}
+            {/* Increased text size and margin */}
             {settings.headerText}
           </p>
-          <h1 className="text-9xl font-bold text-white whitespace-pre-line leading-tight tracking-tight"> {/* Increased text size */}
+          <h1 className="text-9xl font-bold text-white whitespace-pre-line leading-tight tracking-tight">
+            {" "}
+            {/* Increased text size */}
             {settings.title}
           </h1>
         </div>
-
         {/* Optimized content grid for 4K */}
-        <div className="flex-1 px-16 pb-20 relative z-10"> {/* Increased padding */}
+        <div className="flex-1 px-16 pb-20 relative z-10">
+          {" "}
+          {/* Increased padding */}
           <div
             className="grid w-full h-full"
             style={{
@@ -138,9 +146,13 @@ export default function DisplayLayout() {
                   className="rounded-2xl shadow-2xl overflow-hidden" // Increased border radius
                   style={blockStyle}
                 >
-                  <div className="p-12 flex-1 overflow-auto"> {/* Increased padding */}
+                  <div className="p-12 flex-1 overflow-auto">
+                    {" "}
+                    {/* Increased padding */}
                     {/* Larger text for 4K display */}
-                    <div className="text-6xl font-medium h-full w-full"> {/* Increased text size */}
+                    <div className="text-6xl font-medium h-full w-full">
+                      {" "}
+                      {/* Increased text size */}
                       {renderBlock(block)}
                     </div>
                   </div>
