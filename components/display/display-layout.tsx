@@ -73,24 +73,31 @@ export default function DisplayLayout() {
           ? `url(${settings.backgroundImageUrl})`
           : "none",
         backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundPosition: "center center",
         backgroundRepeat: "no-repeat",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        transform: "rotate(270deg)", // Scale to match 16:9 aspect ratio
+        alignContent: "center",
+        transform: "rotate(270deg)",
         transformOrigin: "center center",
+        margin: "auto",
+        marginBottom: 0,
+        marginLeft: 0,
+        // overflow: "hidden",
+        width: "100vh",
+        aspectRatio: "16/9",
       }}
     >
       {/* Optimized container for 4K (3840×2160 in portrait mode) */}
-      <div className="w-full h-full max-w-[2160px] max-h-[3840px] flex flex-col">
+      <div className="w-full h-full max-w-[2160px] max-h-[3840px] flex flex-col p-0">
         {/* Semi-transparent overlay for better text contrast */}
         {settings.backgroundImageUrl && (
           <div className="absolute inset-0 bg-black bg-opacity-50 pointer-events-none" />
         )}
 
         {/* Enhanced header section for 4K */}
-        <div className="text-center py-12 relative z-10">
+        <div className="text-center relative z-10">
           <p className="text-6xl font-light text-white/90 mb-4">
             {settings.headerText}
           </p>
@@ -100,7 +107,7 @@ export default function DisplayLayout() {
         </div>
 
         {/* Optimized content grid for 4K */}
-        <div className="flex-1 px-12 pb-16 relative z-10">
+        <div className="flex-1 relative z-10">
           <div
             className="grid w-full h-full"
             style={{
