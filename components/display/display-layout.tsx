@@ -87,6 +87,7 @@ export default function DisplayLayout() {
         // overflow: "hidden",
         width: "100vh",
         aspectRatio: "16/9",
+        padding: "60px",
       }}
     >
       {/* Optimized container for 4K (3840×2160 in portrait mode) */}
