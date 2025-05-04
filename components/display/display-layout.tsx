@@ -66,7 +66,7 @@ export default function DisplayLayout() {
 
   return (
     <div
-      className="h-screen w-screen display-layout"
+      className="h-screen w-screen display-layout overflow-hidden"
       style={{
         backgroundColor: settings.backgroundColor,
         backgroundImage: settings.backgroundImageUrl
@@ -78,27 +78,27 @@ export default function DisplayLayout() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        alignContent: "center",
         transform: "rotate(270deg)",
         transformOrigin: "center center",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         margin: "auto",
-        marginBottom: 0,
-        marginLeft: 0,
-        // overflow: "hidden",
         width: "100vh",
-        aspectRatio: "16/9",
-        padding: "60px",
+        height: "100vw",
       }}
     >
-      {/* Optimized container for 4K (3840×2160 in portrait mode) */}
-      <div className="w-full h-full max-w-[2160px] max-h-[3840px] flex flex-col p-0">
+      {/* Optimized container with better centering */}
+      <div className="w-full h-full flex flex-col p-8 relative mx-auto">
         {/* Semi-transparent overlay for better text contrast */}
         {settings.backgroundImageUrl && (
           <div className="absolute inset-0 bg-black bg-opacity-50 pointer-events-none" />
         )}
 
         {/* Enhanced header section for 4K */}
-        <div className="text-center relative z-10">
+        <div className="text-center relative z-10 mb-8">
           <p className="text-6xl font-light text-white/90 mb-4">
             {settings.headerText}
           </p>

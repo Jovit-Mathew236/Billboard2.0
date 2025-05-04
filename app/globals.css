@@ -67,11 +67,28 @@
 
 
   .display-layout {
+    overflow: hidden;
+    box-sizing: border-box;
+  }
 
-    /* 4K optimized display styles */
-    .rounded-lg {
-      border-radius: 5rem;
-    }
+  .display-layout .rounded-lg {
+    border-radius: 2.5rem;
+  }
+
+  .display-layout .shadow-2xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  .display-layout .text-6xl {
+    font-size: 3.5rem !important;
+  }
+
+  .display-layout .text-8xl {
+    font-size: 4.5rem !important;
+  }
+
+  .display-layout .text-5xl {
+    font-size: 3rem !important;
   }
 
   /* Increased heading sizes for 4K display */
