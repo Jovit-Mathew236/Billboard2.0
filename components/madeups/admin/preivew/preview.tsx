@@ -20,7 +20,7 @@ const Preview = () => {
         {" "}
         {/* 9:16 aspect ratio */}
         <iframe
-          src="https://billboardsjcetapp.netlify.app" // Replace with the URL you want to load
+          src="https://billboard2.vercel.app/display" // Replace with the URL you want to load
           style={{
             position: "absolute",
             top: 0,

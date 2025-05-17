@@ -219,11 +219,13 @@ const SortableBlock = ({
   onEdit,
   onDelete,
   theme,
+  customStyle = {},
 }: {
   block: ContentBlock;
   onEdit: (block: ContentBlock) => void;
   onDelete: (id: string) => void;
   theme: string | undefined;
+  customStyle?: React.CSSProperties;
 }) => {
   const {
     attributes,
@@ -240,6 +242,7 @@ const SortableBlock = ({
     touchAction: "none",
     zIndex: isDragging ? 1000 : 1,
     opacity: isDragging ? 0.8 : 1,
+    ...customStyle,
   };
 
   return (
@@ -248,33 +251,43 @@ const SortableBlock = ({
       style={style}
       className={cn(
         "content-block relative rounded-lg shadow-md p-4 edit-dashboard-block",
-        `col-span-${block.width}`,
         block.theme || theme,
         "touch-none",
         isDragging ? "border-2 border-blue-500 bg-blue-50" : "",
-        "hover:shadow-lg transition-shadow"
+        "hover:shadow-lg transition-shadow",
+        "md:min-w-[250px] lg:min-w-[300px]"
       )}
       {...attributes}
     >
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center mb-3">
         <div
           {...listeners}
           className="p-2 -m-2 cursor-grab rounded hover:bg-gray-100 active:cursor-grabbing"
         >
           <GripVertical className="text-gray-500" />
         </div>
-        <h3 className="font-medium truncate mx-2">{block.title}</h3>
+        <h3 className="font-medium truncate mx-2 flex-1">{block.title}</h3>
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => onEdit(block)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(block)}
+            className="hover:bg-gray-100"
+          >
             <Edit2 className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => onDelete(block.id)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDelete(block.id)}
+            className="hover:bg-gray-100"
+          >
             <X className="h-4 w-4" />
           </Button>
         </div>
       </div>
       <div
-        className="overflow-hidden"
+        className="overflow-hidden rounded-md p-2"
         style={{ maxHeight: `${block.height - 50}px` }}
       >
         {renderBlockPreview(block)}
@@ -394,7 +407,7 @@ const EditDashboard = () => {
         case "time":
           blockData = {
             ...newBlock,
-            format: "24h",
+            format: "12h",
             showSeconds: true,
           } as Omit<TimeField, "id">;
           break;
@@ -509,6 +522,12 @@ const EditDashboard = () => {
           Object.assign(blockData, {
             headers: (updatedBlock as TableField).headers || [],
             rows: (updatedBlock as TableField).rows || "[]",
+          });
+          break;
+        case "time":
+          Object.assign(blockData, {
+            format: (updatedBlock as TimeField).format || "12h",
+            showSeconds: (updatedBlock as TimeField).showSeconds ?? true, // Ensure boolean, default to true
           });
           break;
         case "carousel":
@@ -748,25 +767,51 @@ const EditDashboard = () => {
           modifiers={[]}
         >
           <div
-            className="grid grid-cols-12 gap-4 p-4 relative"
+            className="relative h-full"
             ref={containerRef}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(12, 1fr)",
+              gridTemplateRows: "repeat(10, 1fr)",
+              gap: "1rem",
+              padding: "1rem",
+            }}
           >
             <SortableContext
               items={blocks.map((block) => block.id)}
               strategy={verticalListSortingStrategy}
             >
-              {blocks.map((block) => (
-                <SortableBlock
-                  key={block.id}
-                  block={block}
-                  theme={theme}
-                  onEdit={(block) => {
-                    setEditingBlock(block);
-                    setIsDialogOpen(true);
-                  }}
-                  onDelete={deleteBlock}
-                />
-              ))}
+              {blocks.map((block) => {
+                // Calculate grid span based on block width (1-12)
+                const colSpan = Math.min(Math.max(block.width || 6, 1), 12);
+
+                // Calculate row span based on block height
+                const heightValue = block.height || 200;
+                const rowSpan = Math.min(
+                  Math.max(Math.ceil(heightValue / 50), 1),
+                  12
+                );
+
+                // Define custom style for this block
+                const customStyle = {
+                  gridColumn: `span ${colSpan}`,
+                  gridRow: `span ${rowSpan}`,
+                };
+
+                return (
+                  <SortableBlock
+                    key={block.id}
+                    block={block}
+                    theme={theme}
+                    customStyle={customStyle}
+                    onEdit={(block) => {
+                      setEditingBlock(block);
+                      setIsDialogOpen(true);
+                    }}
+                    onDelete={deleteBlock}
+                  />
+                );
+              })}
             </SortableContext>
           </div>
         </DndContext>
@@ -876,7 +921,7 @@ const EditDashboard = () => {
             <h3 className="text-lg font-semibold mb-4">Add New Block</h3>
             <div className="grid grid-cols-2 gap-4">
               <Button onClick={() => addNewBlock("text")}>Text Block</Button>
-              <Button onClick={() => addNewBlock("image")}>Image Block</Button>
+              {/* <Button onClick={() => addNewBlock("image")}>Image Block</Button> */}
               <Button onClick={() => addNewBlock("list")}>List Block</Button>
               <Button onClick={() => addNewBlock("weather")}>
                 Weather Block
@@ -886,7 +931,7 @@ const EditDashboard = () => {
               <Button onClick={() => addNewBlock("news")}>News Block</Button>
               <Button onClick={() => addNewBlock("table")}>Table Block</Button>
               <Button onClick={() => addNewBlock("carousel")}>
-                Carousel Block
+                Image Block
               </Button>
             </div>
           </DialogContent>
@@ -1047,6 +1092,35 @@ const EditDashboard = () => {
               </div>
 
               {/* Block-specific controls */}
+              {editingBlock.type === "time" && (
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={(editingBlock as TimeField).format === "12h"}
+                      onCheckedChange={(checked: boolean) =>
+                        setEditingBlock({
+                          ...editingBlock,
+                          format: checked ? "12h" : "24h",
+                        } as TimeField)
+                      }
+                    />
+                    <Label>12-hour format (with AM/PM)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={(editingBlock as TimeField).showSeconds || false}
+                      onCheckedChange={(checked: boolean) =>
+                        setEditingBlock({
+                          ...editingBlock,
+                          showSeconds: checked,
+                        } as TimeField)
+                      }
+                    />
+                    <Label>Show seconds</Label>
+                  </div>
+                </div>
+              )}
+
               {editingBlock.type === "news" && (
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
@@ -1121,6 +1195,7 @@ const EditDashboard = () => {
                             items: [...(editingBlock as ListField).items, ""],
                           } as ListField);
                         }}
+                        className="mt-2"
                       >
                         Add Item
                       </Button>

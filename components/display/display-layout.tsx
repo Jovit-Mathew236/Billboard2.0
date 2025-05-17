@@ -91,10 +91,10 @@ export default function DisplayLayout() {
       }}
     >
       {/* Optimized container with better centering */}
-      <div className="w-full h-full flex flex-col p-8 relative mx-auto">
+      <div className="w-full h-full flex flex-col p-8 relative mx-auto scale-95">
         {/* Semi-transparent overlay for better text contrast */}
         {settings.backgroundImageUrl && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 pointer-events-none" />
+          <div className="absolute inset-0 bg-opacity-50 pointer-events-none" />
         )}
 
         {/* Enhanced header section for 4K */}
@@ -113,7 +113,7 @@ export default function DisplayLayout() {
             className="grid w-full h-full"
             style={{
               gridTemplateColumns: "repeat(12, 1fr)",
-              gridTemplateRows: "repeat(12, 1fr)",
+              gridTemplateRows: "repeat(10, 1fr)",
               gap: "2rem",
             }}
           >
@@ -126,7 +126,7 @@ export default function DisplayLayout() {
               const heightValue = block.height || 200;
               const rowSpan = Math.min(
                 Math.max(Math.ceil(heightValue / 50), 1),
-                12
+                10
               );
 
               // Define styles for this specific block

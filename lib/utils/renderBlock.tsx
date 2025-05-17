@@ -62,7 +62,7 @@ export function renderBlock(block: ContentBlock) {
       const listBlock = block as ListField;
       return (
         <div
-          className="p-4 h-full"
+          className="p-10 ml-4 h-full"
           style={{
             backgroundColor: block.backgroundColor,
             color: block.textColor,
@@ -71,16 +71,16 @@ export function renderBlock(block: ContentBlock) {
           <h3 className="mb-2 text-xl font-semibold">{block.title}</h3>
           <ul
             className={cn(
-              "list-inside",
+              "list-inside px-2",
               listBlock.listStyle === "number"
-                ? "list-decimal"
+                ? "list-decimal text-sm"
                 : listBlock.listStyle === "bullet"
                 ? "list-disc"
                 : "list-none"
             )}
           >
             {listBlock.items.map((item, index) => (
-              <li key={index} className="mb-2">
+              <li key={index} className="mb-3">
                 {item}
               </li>
             ))}
@@ -108,11 +108,15 @@ export function renderBlock(block: ContentBlock) {
           style={commonStyles}
         >
           <h3 className="mb-2 text-xl font-semibold">{block.title}</h3>
-          <TimeWidget
-            format={timeBlock.format}
-            showSeconds={timeBlock.showSeconds}
-            className="text-6xl font-bold flex flex-col items-center justify-center"
-          />
+          <div className="flex flex-col items-center">
+            <TimeWidget
+              format={timeBlock.format}
+              showSeconds={timeBlock.showSeconds}
+              className={cn(
+                "font-bold flex items-center justify-center text-6xl"
+              )}
+            />
+          </div>
         </div>
       );
 
