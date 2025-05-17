@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "standalone",
     orientation: "portrait",
     background_color: "#ffffff", // Change to white for better contrast in light theme
-    theme_color: "#0ed3cf", // Update this to match the meta tag color
+    theme_color: "#daf4ff", // Update this to match the meta tag color
     icons: [
       {
         src: "/android-chrome-192x192.png",
