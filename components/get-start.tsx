@@ -27,7 +27,7 @@ const GetStart = () => {
         />
         <Button
           onClick={() => {
-            window.location.href = "/login";
+            window.location.href = "/admin";
           }}
           className="absolute h-14 text-md text-gray-400 font-regular bottom-5 w-11/12 rounded-full"
         >
