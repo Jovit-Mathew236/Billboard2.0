@@ -138,6 +138,8 @@ export function renderBlock(block: ContentBlock) {
         console.error("Error parsing table rows:", error);
       }
 
+      const columnWidths = ["180px", "120px", "90px", "90px", "90px"]; // Adjust as needed
+
       return (
         <div className="p-4 h-full flex flex-col" style={commonStyles}>
           <h3 className="mb-4 text-2xl font-semibold">{block.title}</h3>
@@ -149,6 +151,7 @@ export function renderBlock(block: ContentBlock) {
                     <th
                       key={index}
                       className="border-2 p-3 text-left font-bold"
+                      style={{ width: columnWidths[index] || "90px" }} // Use custom width
                     >
                       {header}
                     </th>
@@ -162,7 +165,11 @@ export function renderBlock(block: ContentBlock) {
                     className={rowIndex % 2 === 0 ? "bg-black/5" : ""}
                   >
                     {row.map((cell, cellIndex) => (
-                      <td key={cellIndex} className="border-2 p-3">
+                      <td
+                        key={cellIndex}
+                        className="border-2 p-3"
+                        style={{ width: columnWidths[cellIndex] || "90px" }} // Match header width
+                      >
                         {cell}
                       </td>
                     ))}
