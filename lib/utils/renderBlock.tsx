@@ -141,7 +141,7 @@ export function renderBlock(block: ContentBlock) {
       const columnWidths = ["180px", "120px", "90px", "90px", "90px"]; // Adjust as needed
 
       return (
-        <div className="pt-4 pr-4 pl-4 pb-1 h-full flex flex-col" style={commonStyles}>
+        <div className="pt-4 pr-4 pl-4 pb-1 flex flex-col" style={commonStyles}>
           <h3 className="mb-4 text-2xl font-semibold">{block.title}</h3>
           <div className="overflow-auto flex-1">
             <table className="w-full border-collapse table-fixed">
