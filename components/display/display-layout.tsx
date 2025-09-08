@@ -113,7 +113,7 @@ export default function DisplayLayout() {
             className="grid w-full h-full"
             style={{
               gridTemplateColumns: "repeat(12, 1fr)",
-              gridTemplateRows: "repeat(10, 1fr)",
+              gridTemplateRows: "repeat(10, auto)",
               gap: "2rem",
             }}
           >
