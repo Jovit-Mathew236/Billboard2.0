@@ -148,7 +148,7 @@ export default function DisplayLayout() {
                 >
                   <div className="p-10 flex-1 overflow-auto">
                     {/* Larger text for 4K display */}
-                    <div className="text-5xl font-medium h-full w-full">
+                    <div className="text-5xl font-medium w-full">
                       {renderBlock(block)}
                     </div>
                   </div>
