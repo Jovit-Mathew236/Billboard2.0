@@ -146,7 +146,7 @@ export default function DisplayLayout() {
                   className="rounded-lg shadow-2xl overflow-hidden"
                   style={blockStyle}
                 >
-                  <div className="p-10 flex-1 overflow-auto">
+                  <div className="p-10 overflow-auto">
                     {/* Larger text for 4K display */}
                     <div className="text-5xl font-medium w-full">
                       {renderBlock(block)}
