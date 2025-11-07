@@ -317,6 +317,8 @@ const EditDashboard = () => {
     title: "ELECTRONICS & COMPUTER ENGINEERING",
     backgroundImageUrl: "",
     backgroundS3Key: "",
+    // gridRowHeight controls the base height (px) of a single grid row in previews & display
+    gridRowHeight: 50,
   });
 
   // --- Input string states for dimension fields ---
@@ -367,6 +369,10 @@ const EditDashboard = () => {
           title: settingsData.title || prev.title,
           backgroundImageUrl: settingsData.backgroundImageUrl || "",
           backgroundS3Key: settingsData.backgroundS3Key || "",
+          gridRowHeight:
+            typeof settingsData.gridRowHeight === "number"
+              ? settingsData.gridRowHeight
+              : prev.gridRowHeight,
         }));
       }
     });
@@ -745,6 +751,10 @@ const EditDashboard = () => {
           <div
             className="relative h-full grid grid-cols-12 grid-rows-10 gap-4 p-4" // Simplified styling
             ref={containerRef}
+            // Use the global gridRowHeight so preview matches the display
+            style={{
+              gridAutoRows: `${Number(globalSettings.gridRowHeight) || 50}px`,
+            }}
             // style={{ // Style applied directly if needed, else handled by grid classes
             //   display: "grid",
             //   gridTemplateColumns: "repeat(12, 1fr)",
@@ -759,13 +769,13 @@ const EditDashboard = () => {
             >
               {blocks.map((block) => {
                 const colSpan = Math.min(Math.max(block.width || 6, 1), 12);
-                const baseRowHeightUnit = 50; // Define a unit for height -> row span calculation
+                const baseRowHeightUnit = Number(globalSettings.gridRowHeight) || 50; // Use global setting
                 const rowSpan = Math.min(
                   Math.max(
                     Math.ceil((block.height || 200) / baseRowHeightUnit),
                     1
                   ),
-                  10 // Max row span (assuming 10 rows in grid-rows-10)
+                  20 // Max row span increased to match display behavior
                 );
 
                 const customStyle = {
@@ -885,6 +895,26 @@ const EditDashboard = () => {
                       })
                     }
                   />
+                </div>
+                <div>
+                  <Label>Grid Row Height (px)</Label>
+                  <Input
+                    type="number"
+                    value={String(globalSettings.gridRowHeight || 50)}
+                    onChange={(e) =>
+                      setGlobalSettings((prev) => ({
+                        ...prev,
+                        gridRowHeight: Number(e.target.value) || 50,
+                      }))
+                    }
+                    onBlur={() => {
+                      /* Persist to Firestore when Save Settings is clicked - this just updates local state for preview */
+                    }}
+                    placeholder="e.g., 50"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Controls the base row height used for grid previews and the live display.
+                  </p>
                 </div>
                 <Button onClick={updateGlobalSettings}>Save Settings</Button>
               </div>
@@ -1030,8 +1060,9 @@ const EditDashboard = () => {
                         finalHeight = 200; // Or specific minimum if cleared
                       } else {
                         const numValue = parseInt(rawValue, 10);
-                        if (!isNaN(numValue)) {
-                          finalHeight = Math.max(50, numValue); // Min height 50px
+            if (!isNaN(numValue)) {
+              // Allow smaller heights; grid row base height may still set a minimum visual size
+              finalHeight = Math.max(1, numValue); // Minimum 1px
                         } else {
                           finalHeight = editingBlock?.height || 200; // Revert
                         }

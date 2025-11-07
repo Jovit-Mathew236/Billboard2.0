@@ -64,6 +64,10 @@ export default function DisplayLayout() {
     return () => unsubscribe();
   }, []);
 
+  // Base row height for the CSS grid. Allows an optional override from settings (settings.gridRowHeight)
+  // If admin sets a grid row height in settings it'll be used; otherwise default to 50px.
+  const baseRowHeight = ((settings as any).gridRowHeight as number) ?? 50;
+
   return (
     <div
       className="h-screen w-screen display-layout overflow-hidden"
@@ -98,7 +102,7 @@ export default function DisplayLayout() {
         )}
 
         {/* Enhanced header section for 4K */}
-        <div className="text-center relative z-10 mb-8">
+        <div className="text-center relative z-10 mb-2">
           <p className="text-6xl font-light text-white/90 mb-4">
             {settings.headerText}
           </p>
@@ -113,7 +117,9 @@ export default function DisplayLayout() {
             className="grid w-full h-full"
             style={{
               gridTemplateColumns: "repeat(12, 1fr)",
-              gridTemplateRows: "repeat(10, auto)",
+              // Use a fixed base row height so span calculations are predictable.
+              // Each row will be `baseRowHeight` px tall; `gridRow: span N` will multiply this.
+              gridAutoRows: `${baseRowHeight}px`,
               gap: "2rem",
             }}
           >
@@ -121,12 +127,14 @@ export default function DisplayLayout() {
               // Calculate grid span based on block width (1-12)
               const colSpan = Math.min(Math.max(block.width || 6, 1), 12);
 
-              // Calculate row span based on block height
-              // Normalize height to a 1-12 scale (assuming max height around 600px)
+              // Calculate row span based on block height. We use the baseRowHeight so
+              // admin-specified heights / block.height values map predictably to grid rows.
               const heightValue = block.height || 200;
+              // Add a small buffer to account for padding inside the block (p-10 adds visual height)
+              const paddedHeight = heightValue + 40;
               const rowSpan = Math.min(
-                Math.max(Math.ceil(heightValue / 50), 1),
-                10
+                Math.max(Math.ceil(paddedHeight / baseRowHeight), 1),
+                20
               );
 
               // Define styles for this specific block
@@ -138,6 +146,8 @@ export default function DisplayLayout() {
                 display: "flex",
                 flexDirection: "column",
                 border: "1px solid rgba(255,255,255,0.1)",
+                // Ensure the block has at least the explicit height requested (helps when content is small)
+                minHeight: block.height ? `${block.height}px` : undefined,
               };
 
               return (
