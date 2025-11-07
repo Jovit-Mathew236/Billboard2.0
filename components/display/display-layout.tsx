@@ -94,15 +94,15 @@ export default function DisplayLayout() {
         height: "100vw",
       }}
     >
-      {/* Optimized container with better centering */}
-      <div className="w-full h-full flex flex-col p-8 relative mx-auto scale-95">
+  {/* Optimized container with better centering */}
+  <div className="w-full h-full flex flex-col pt-4 px-8 -mt-12 relative mx-auto scale-95">
         {/* Semi-transparent overlay for better text contrast */}
         {settings.backgroundImageUrl && (
           <div className="absolute inset-0 bg-opacity-50 pointer-events-none" />
         )}
 
         {/* Enhanced header section for 4K */}
-        <div className="text-center relative z-10 mb-2">
+  <div className="text-center relative z-10 mb-4">
           <p className="text-6xl font-light text-white/90 mb-4">
             {settings.headerText}
           </p>
@@ -150,6 +150,20 @@ export default function DisplayLayout() {
                 minHeight: block.height ? `${block.height}px` : undefined,
               };
 
+              // Special handling for carousel blocks to avoid extra padding/containers
+              if (block.type === 'carousel') {
+                return (
+                  <div
+                    key={block.id}
+                    className="rounded-lg shadow-2xl overflow-hidden"
+                    style={blockStyle}
+                  >
+                    {renderBlock(block)}
+                  </div>
+                );
+              }
+              
+              // Normal blocks get the standard container treatment
               return (
                 <div
                   key={block.id}

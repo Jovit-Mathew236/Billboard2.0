@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
       Key: `imagetemp/${addedByUid}-${Date.now()}.webp`,
       Body: webpBuffer,
       ContentType: "image/webp",
+      ACL: "public-read",
     };
 
     const uploadResult = await s3.upload(params).promise();

@@ -48,11 +48,16 @@ export function renderBlock(block: ContentBlock) {
       return (
         <div className="h-full w-full overflow-hidden rounded-3xl">
           <div className="relative w-full h-full">
-            <Image
+            {/* Switch to regular img tag for consistency with carousel */}
+            <img
               src={imageBlock.imageUrl}
               alt={imageBlock.alt || imageBlock.title}
-              fill
-              className="object-cover rounded-lg"
+              className="w-full h-full object-cover rounded-lg"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                margin: 'auto'
+              }}
             />
           </div>
         </div>
@@ -397,6 +402,7 @@ export function ImageCarouselBlock({ block }: { block: CarouselField }) {
   );
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showDebugList, setShowDebugList] = useState(false);
 
   // Fetch images from Firebase
   useEffect(() => {
@@ -444,25 +450,54 @@ export function ImageCarouselBlock({ block }: { block: CarouselField }) {
   }
 
   return (
-    <div className="w-full h-full relative overflow-hidden rounded-lg">
-      {images.map((image, index) => (
-        <div
-          key={image.id}
-          className="absolute inset-0 w-full h-full transition-opacity duration-1000"
-          style={{
-            opacity: index === currentImageIndex ? 1 : 0,
-            zIndex: index === currentImageIndex ? 1 : 0,
-          }}
+    <div 
+      className="w-full h-full overflow-hidden relative" 
+    >
+      {/* Debug overlay */}
+      <div className="absolute top-3 right-3 z-20 bg-black/60 text-white text-xs rounded px-2 py-1">
+        <div>slides: {images.length}</div>
+        <div>idx: {currentImageIndex}</div>
+        <button
+          className="underline mt-1 text-[11px]"
+          onClick={() => setShowDebugList((s) => !s)}
+          type="button"
         >
-          <Image
-            src={image.imageUrl}
-            alt={`Slide ${index + 1}`}
-            fill
-            className="object-cover"
-            priority={index === currentImageIndex}
+          {showDebugList ? "hide" : "show"} urls
+        </button>
+      </div>
+      {showDebugList && (
+        <div className="absolute top-12 right-3 z-20 max-h-48 overflow-auto bg-black/60 text-white text-xs rounded p-2 w-64">
+          {images.map((img, i) => (
+            <div key={img.id} className="mb-1 break-words">
+              {i}: <a className="underline" href={img.imageUrl} target="_blank" rel="noreferrer">{img.imageUrl}</a>
+            </div>
+          ))}
+        </div>
+      )}
+      
+      {/* Direct image rendering */}
+      {images[currentImageIndex] && (
+        <div className="absolute inset-0 w-full h-full bg-black/10">
+          <img
+            key={images[currentImageIndex].id}
+            src={images[currentImageIndex].imageUrl}
+            alt={`Slide ${currentImageIndex + 1}`}
+            className="w-full h-full object-cover"
+            style={{
+              display: 'block'
+            }}
+            onError={(e) => {
+              console.error("Carousel image failed to load:", images[currentImageIndex].imageUrl);
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+            onLoad={(e) => {
+              console.log("Image loaded successfully:", images[currentImageIndex].imageUrl);
+              // Make sure the image is visible
+              (e.target as HTMLImageElement).style.display = "block";
+            }}
           />
         </div>
-      ))}
+      )}
 
       {/* Pagination dots */}
       <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
