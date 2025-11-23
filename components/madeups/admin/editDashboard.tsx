@@ -5,6 +5,16 @@ import { useRouter } from "next/navigation";
 import { Plus, GripVertical, X, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -265,7 +275,7 @@ const SortableBlock = ({
       {...attributes}
     >
       {/* Edit Controls Overlay */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-2 bg-gradient-to-b from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity">
+      <div className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-2 bg-gradient-to-b from-black/60 to-transparent transition-opacity">
         <div
           {...listeners}
           className="p-1.5 cursor-grab rounded-lg bg-white/20 hover:bg-white/30 active:cursor-grabbing backdrop-blur-sm"
@@ -309,6 +319,8 @@ const EditDashboard = () => {
   const [blocks, setBlocks] = useState<ContentBlock[]>([]);
   const [editingBlock, setEditingBlock] = useState<ContentBlock | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [blockToDelete, setBlockToDelete] = useState<ContentBlock | null>(null);
   const { theme } = useTheme();
   const [globalSettings, setGlobalSettings] = useState({
     backgroundColor: "#000000",
@@ -644,13 +656,19 @@ const EditDashboard = () => {
     }
   };
 
-  const deleteBlock = async (id: string) => {
-    try {
-      const blockToDelete = blocks.find((block) => block.id === id);
-      if (!blockToDelete) return;
+  const handleDeleteClick = (id: string) => {
+    const block = blocks.find((block) => block.id === id);
+    if (!block) return;
+    setBlockToDelete(block);
+    setDeleteConfirmOpen(true);
+  };
 
+  const confirmDelete = async () => {
+    if (!blockToDelete) return;
+
+    try {
       const deletedPosition = blockToDelete.position;
-      await deleteDoc(doc(db, "blocks", id));
+      await deleteDoc(doc(db, "blocks", blockToDelete.id));
 
       // Position updates will be complex if not handled by a transaction or cloud function.
       // For simplicity, the onSnapshot listener sorting by position should eventually correct the view.
@@ -659,7 +677,7 @@ const EditDashboard = () => {
         const updates = blocks
           .filter(
             (b) =>
-              b.id !== id &&
+              b.id !== blockToDelete.id &&
               b.position !== undefined &&
               b.position > deletedPosition
           )
@@ -672,10 +690,19 @@ const EditDashboard = () => {
           );
         await Promise.all(updates);
       }
-      // Local state update will be handled by onSnapshot.
+
+      // Close the confirmation dialog
+      setDeleteConfirmOpen(false);
+      setBlockToDelete(null);
     } catch (error) {
       console.error("Error deleting block:", error);
+      alert("Error deleting block. Please try again.");
     }
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmOpen(false);
+    setBlockToDelete(null);
   };
 
   const sensors = useSensors(
@@ -873,7 +900,7 @@ const EditDashboard = () => {
                           setEditingBlock(b);
                           setIsDialogOpen(true);
                         }}
-                        onDelete={deleteBlock}
+                        onDelete={handleDeleteClick}
                       />
                     );
                   })}
@@ -1643,6 +1670,60 @@ const EditDashboard = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent className="sm:max-w-[425px] w-10/12 rounded-lg bg-background text-foreground border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
+              <span className="text-3xl">⚠️</span>
+              Delete Block?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base space-y-3 pt-4">
+              <div className="bg-red-50 dark:bg-red-950/30 border-l-4 border-red-500 dark:border-red-600 p-4 rounded">
+                <p className="font-semibold text-red-900 dark:text-red-200">
+                  Are you sure you want to delete this block?
+                </p>
+              </div>
+
+              {blockToDelete && (
+                <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground font-medium">Title:</span>
+                    <span className="text-foreground font-semibold">
+                      {blockToDelete.title}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground font-medium">Type:</span>
+                    <span className="text-foreground font-semibold uppercase">
+                      {blockToDelete.type}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <p className="text-red-600 dark:text-red-400 font-semibold text-sm">
+                ⚠️ This action cannot be undone!
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel
+              onClick={cancelDelete}
+              className="bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white"
+            >
+              Delete Block
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
