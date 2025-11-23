@@ -225,7 +225,7 @@ const SortableBlock = ({
   block,
   onEdit,
   onDelete,
-  theme,
+  // theme,
   customStyle = {},
 }: {
   block: ContentBlock;
@@ -246,9 +246,9 @@ const SortableBlock = ({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    touchAction: "none", // Important for dnd-kit pointer sensor
+    touchAction: "none",
     zIndex: isDragging ? 1000 : 1,
-    opacity: isDragging ? 0.8 : 1,
+    opacity: isDragging ? 0.9 : 1,
     ...customStyle,
   };
 
@@ -257,47 +257,46 @@ const SortableBlock = ({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "content-block relative rounded-lg shadow-md p-4 edit-dashboard-block",
-        block.theme || theme,
-        "touch-none", // Ensure touch-action is set
-        isDragging ? "border-2 border-blue-500 bg-blue-50" : "",
-        "hover:shadow-lg transition-shadow",
-        "md:min-w-[250px] lg:min-w-[300px]"
+        "relative rounded-2xl shadow-xl overflow-hidden border border-white/10 backdrop-blur-sm",
+        "touch-none",
+        isDragging ? "ring-4 ring-blue-400 ring-opacity-50 scale-105" : "",
+        "hover:shadow-2xl transition-all duration-200"
       )}
       {...attributes}
     >
-      <div className="flex justify-between items-center mb-3">
+      {/* Edit Controls Overlay */}
+      <div className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-2 bg-gradient-to-b from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity">
         <div
           {...listeners}
-          className="p-2 -m-2 cursor-grab rounded hover:bg-gray-100 active:cursor-grabbing"
+          className="p-1.5 cursor-grab rounded-lg bg-white/20 hover:bg-white/30 active:cursor-grabbing backdrop-blur-sm"
         >
-          <GripVertical className="text-gray-500" />
+          <GripVertical className="h-4 w-4 text-white" />
         </div>
-        <h3 className="font-medium truncate mx-2 flex-1">{block.title}</h3>
-        <div className="flex gap-2">
+        <h3 className="text-xs font-semibold truncate mx-2 flex-1 text-white drop-shadow">
+          {block.title}
+        </h3>
+        <div className="flex gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onEdit(block)}
-            className="hover:bg-gray-100"
+            className="h-7 w-7 p-0 bg-white/20 hover:bg-white/30 backdrop-blur-sm"
           >
-            <Edit2 className="h-4 w-4" />
+            <Edit2 className="h-3 w-3 text-white" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onDelete(block.id)}
-            className="hover:bg-gray-100"
+            className="h-7 w-7 p-0 bg-white/20 hover:bg-white/30 backdrop-blur-sm"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3 w-3 text-white" />
           </Button>
         </div>
       </div>
-      <div
-        className="overflow-hidden rounded-md p-2"
-        // Ensure height calculation is robust
-        style={{ maxHeight: `${Math.max(0, (block.height || 200) - 70)}px` }} // Adjusted for padding/header
-      >
+
+      {/* Content Preview - Matching Display */}
+      <div className="w-full h-full p-2 overflow-hidden flex flex-col text-xs">
         {renderBlockPreview(block)}
       </div>
     </div>
@@ -515,11 +514,73 @@ const EditDashboard = () => {
     }
   };
 
+  // Validation function to check if layout is feasible
+  const validateBlockDimensions = (
+    block: ContentBlock
+  ): { valid: boolean; message: string } => {
+    const width = Number(block.width) || 4;
+    const height = Number(block.height) || 200;
+
+    // Calculate row span using same formula as display
+    const rowSpan = Math.min(Math.max(Math.ceil(height / 80), 1), 8);
+
+    // Check if width is valid (1-12)
+    if (width < 1 || width > 12) {
+      return {
+        valid: false,
+        message: `Width must be between 1 and 12 columns. Current: ${width}`,
+      };
+    }
+
+    // Check if height is reasonable (minimum 50px, maximum ~640px for 8 rows)
+    if (height < 50) {
+      return {
+        valid: false,
+        message: `Height too small. Minimum is 50px. Current: ${height}px`,
+      };
+    }
+
+    if (height > 640) {
+      return {
+        valid: false,
+        message: `Height too large. Maximum is 640px (8 rows). Current: ${height}px\nThis will cause overflow on the display.`,
+      };
+    }
+
+    // Warning for very tall blocks that might not fit well
+    if (rowSpan >= 6) {
+      return {
+        valid: true,
+        message: `⚠️ Large block: Takes ${rowSpan} rows. May limit layout flexibility.`,
+      };
+    }
+
+    return { valid: true, message: "Dimensions OK" };
+  };
+
   const updateBlock = async (updatedBlock: ContentBlock) => {
     if (!updatedBlock || !updatedBlock.id) {
       console.error("Attempted to update a block without an ID.", updatedBlock);
       return;
     }
+
+    // Validate dimensions
+    const validation = validateBlockDimensions(updatedBlock);
+    if (!validation.valid) {
+      alert(
+        `❌ Invalid Block Dimensions:\n\n${validation.message}\n\nPlease adjust the width or height.`
+      );
+      return;
+    }
+
+    // Show warning for large blocks
+    if (validation.message.includes("⚠️")) {
+      const proceed = confirm(
+        `${validation.message}\n\nDo you want to continue?`
+      );
+      if (!proceed) return;
+    }
+
     try {
       // Ensure numeric fields are numbers
       const blockData = {
@@ -735,61 +796,90 @@ const EditDashboard = () => {
 
   return (
     <div className="min-h-screen pb-32">
-      {/* ... (Billboard Preview DndContext and SortableContext setup remains the same) ... */}
-      <div className="w-full aspect-[9/16] bg-gray-100 rounded-lg mb-8 overflow-auto">
+      {/* Billboard Grid Preview - Exact Match to Display Layout */}
+      <div
+        className="w-full aspect-[9/16] rounded-xl mb-8 overflow-hidden shadow-2xl border-4 border-gray-200"
+        style={{
+          backgroundColor: globalSettings.backgroundColor,
+          backgroundImage: globalSettings.backgroundImageUrl
+            ? `url(${globalSettings.backgroundImageUrl})`
+            : "none",
+          backgroundSize: "cover",
+          backgroundPosition: "center center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <div
-            className="relative h-full grid grid-cols-12 grid-rows-10 gap-4 p-4" // Simplified styling
-            ref={containerRef}
-            // style={{ // Style applied directly if needed, else handled by grid classes
-            //   display: "grid",
-            //   gridTemplateColumns: "repeat(12, 1fr)",
-            //   gridAutoRows: "minmax(50px, auto)", // Example auto row height
-            //   gap: "1rem",
-            //   padding: "1rem",
-            // }}
-          >
-            <SortableContext
-              items={blocks.map((block) => block.id)}
-              strategy={verticalListSortingStrategy} // Or a grid strategy if more appropriate
-            >
-              {blocks.map((block) => {
-                const colSpan = Math.min(Math.max(block.width || 6, 1), 12);
-                const baseRowHeightUnit = 50; // Define a unit for height -> row span calculation
-                const rowSpan = Math.min(
-                  Math.max(
-                    Math.ceil((block.height || 200) / baseRowHeightUnit),
-                    1
-                  ),
-                  10 // Max row span (assuming 10 rows in grid-rows-10)
-                );
+          <div className="h-full flex flex-col p-3 relative">
+            {/* Semi-transparent overlay for better text contrast */}
+            {globalSettings.backgroundImageUrl && (
+              <div className="absolute inset-0 bg-black/30 pointer-events-none backdrop-blur-[1px]" />
+            )}
 
-                const customStyle = {
-                  gridColumn: `span ${colSpan}`,
-                  gridRow: `span ${rowSpan}`,
-                  // backgroundColor: block.backgroundColor, // Apply custom colors here if needed for preview
-                  // color: block.textColor,
-                };
+            {/* Header Section - Matching Display Exactly */}
+            <div className="text-center relative z-10 mb-2 shrink-0">
+              <p className="text-xl font-light text-white/90 mb-1 drop-shadow-lg truncate">
+                {globalSettings.headerText}
+              </p>
+              <h1 className="text-3xl font-bold text-white leading-tight tracking-tight drop-shadow-xl line-clamp-2">
+                {globalSettings.title}
+              </h1>
+            </div>
 
-                return (
-                  <SortableBlock
-                    key={block.id}
-                    block={block}
-                    theme={block.theme || theme} // block.theme takes precedence
-                    customStyle={customStyle}
-                    onEdit={(b) => {
-                      setEditingBlock(b);
-                      setIsDialogOpen(true);
-                    }}
-                    onDelete={deleteBlock}
-                  />
-                );
-              })}
-            </SortableContext>
+            {/* Grid Preview - EXACT MATCH to DisplayLayout calculations */}
+            <div className="flex-1 relative z-10 min-h-0">
+              <div
+                className="w-full h-full grid auto-rows-fr"
+                ref={containerRef}
+                style={{
+                  gridTemplateColumns: "repeat(12, 1fr)",
+                  gap: "0.5rem",
+                  gridAutoFlow: "dense",
+                }}
+              >
+                <SortableContext
+                  items={blocks.map((block) => block.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {blocks.map((block) => {
+                    // EXACT SAME calculations as DisplayLayout
+                    const colSpan = Math.min(Math.max(block.width || 4, 1), 12);
+                    const heightValue = block.height || 200;
+                    const rowSpan = Math.min(
+                      Math.max(Math.ceil(heightValue / 80), 1),
+                      8
+                    );
+
+                    const customStyle = {
+                      gridColumn: `span ${colSpan}`,
+                      gridRow: `span ${rowSpan}`,
+                      minHeight: 0,
+                      minWidth: 0,
+                      backgroundColor: block.backgroundColor || "#ffffff",
+                      color: block.textColor || "#000000",
+                    };
+
+                    return (
+                      <SortableBlock
+                        key={block.id}
+                        block={block}
+                        theme={block.theme || theme}
+                        customStyle={customStyle}
+                        onEdit={(b) => {
+                          setEditingBlock(b);
+                          setIsDialogOpen(true);
+                        }}
+                        onDelete={deleteBlock}
+                      />
+                    );
+                  })}
+                </SortableContext>
+              </div>
+            </div>
           </div>
         </DndContext>
       </div>

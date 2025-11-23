@@ -90,67 +90,57 @@ export default function DisplayLayout() {
         height: "100vw",
       }}
     >
-      {/* Optimized container with better centering */}
-      <div className="w-full h-full flex flex-col p-8 relative mx-auto scale-95">
+      {/* Main container optimized for 4K portrait display */}
+      <div className="w-full h-full flex flex-col p-6 relative">
         {/* Semi-transparent overlay for better text contrast */}
         {settings.backgroundImageUrl && (
-          <div className="absolute inset-0 bg-opacity-50 pointer-events-none" />
+          <div className="absolute inset-0 bg-black/30 pointer-events-none backdrop-blur-[1px]" />
         )}
 
-        {/* Enhanced header section for 4K */}
-        <div className="text-center relative z-10 mb-8">
-          <p className="text-6xl font-light text-white/90 mb-4">
+        {/* Header section - compact and professional */}
+        <div className="text-center relative z-10 mb-4 shrink-0">
+          <p className="text-4xl font-light text-white/90 mb-2 drop-shadow-lg">
             {settings.headerText}
           </p>
-          <h1 className="text-8xl font-bold text-white whitespace-pre-line leading-tight tracking-tight">
+          <h1 className="text-6xl font-bold text-white leading-tight tracking-tight drop-shadow-xl">
             {settings.title}
           </h1>
         </div>
 
-        {/* Optimized content grid for 4K */}
-        <div className="flex-1 relative z-10">
+        {/* Dynamic content grid - auto-flow with proper spacing */}
+        <div className="flex-1 relative z-10 min-h-0">
           <div
-            className="grid w-full h-full"
+            className="w-full h-full grid auto-rows-fr"
             style={{
               gridTemplateColumns: "repeat(12, 1fr)",
-              gridTemplateRows: "repeat(10, 1fr)",
-              gap: "2rem",
+              gap: "1rem",
+              gridAutoFlow: "dense",
             }}
           >
             {blocks.map((block) => {
-              // Calculate grid span based on block width (1-12)
-              const colSpan = Math.min(Math.max(block.width || 6, 1), 12);
+              // Ensure valid column span (1-12)
+              const colSpan = Math.min(Math.max(block.width || 4, 1), 12);
 
-              // Calculate row span based on block height
-              // Normalize height to a 1-12 scale (assuming max height around 600px)
+              // Calculate row span based on height with better scaling
+              // Height is in pixels, we convert to grid rows (each row ~80px on 4K)
               const heightValue = block.height || 200;
-              const rowSpan = Math.min(
-                Math.max(Math.ceil(heightValue / 50), 1),
-                10
-              );
-
-              // Define styles for this specific block
-              const blockStyle: React.CSSProperties = {
-                backgroundColor: block.backgroundColor || "#ffffff",
-                color: block.textColor || "#000000",
-                gridColumn: `span ${colSpan}`,
-                gridRow: `span ${rowSpan}`,
-                display: "flex",
-                flexDirection: "column",
-                border: "1px solid rgba(255,255,255,0.1)",
-              };
+              const rowSpan = Math.min(Math.max(Math.ceil(heightValue / 80), 1), 8);
 
               return (
                 <div
                   key={block.id}
-                  className="rounded-lg shadow-2xl overflow-hidden"
-                  style={blockStyle}
+                  className="rounded-2xl shadow-xl overflow-hidden border border-white/10 backdrop-blur-sm"
+                  style={{
+                    backgroundColor: block.backgroundColor || "#ffffff",
+                    color: block.textColor || "#000000",
+                    gridColumn: `span ${colSpan}`,
+                    gridRow: `span ${rowSpan}`,
+                    minHeight: 0,
+                    minWidth: 0,
+                  }}
                 >
-                  <div className="p-10 flex-1 overflow-auto">
-                    {/* Larger text for 4K display */}
-                    <div className="text-5xl font-medium h-full w-full">
-                      {renderBlock(block)}
-                    </div>
+                  <div className="w-full h-full p-4 overflow-hidden flex flex-col">
+                    {renderBlock(block)}
                   </div>
                 </div>
               );

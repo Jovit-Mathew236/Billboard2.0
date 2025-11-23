@@ -13,29 +13,28 @@ import {
 import Image from "next/image";
 import WeatherWidget from "@/components/weather-widget";
 import TimeWidget from "@/components/time-widget";
-import FacultySection from "@/components/display/faculty-section";
 import { useEffect, useState } from "react";
 import { collection, onSnapshot, query } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { cn } from "@/lib/utils";
 
 export function renderBlock(block: ContentBlock) {
-  const commonStyles = {
-    backgroundColor: block.backgroundColor,
-    color: block.textColor,
-  };
-
   switch (block.type) {
     case "text":
       const textBlock = block as TextField;
       return (
-        <div className="p-4 h-full flex flex-col" style={commonStyles}>
-          <h3 className="mb-2 text-xl font-semibold">{block.title}</h3>
+        <div className="h-full flex flex-col">
+          {block.title && (
+            <h3 className="text-3xl font-bold mb-3 shrink-0 truncate">
+              {block.title}
+            </h3>
+          )}
           <div
             className={cn(
-              "overflow-auto flex-1",
+              "overflow-auto flex-1 text-2xl leading-relaxed scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent",
               textBlock.textAlign === "center" && "text-center",
-              textBlock.textAlign === "right" && "text-right"
+              textBlock.textAlign === "right" && "text-right",
+              textBlock.textAlign === "left" && "text-left"
             )}
           >
             {textBlock.content}
@@ -46,13 +45,15 @@ export function renderBlock(block: ContentBlock) {
     case "image":
       const imageBlock = block as ImageField;
       return (
-        <div className="h-full w-full overflow-hidden rounded-3xl">
+        <div className="h-full w-full overflow-hidden">
           <div className="relative w-full h-full">
             <Image
               src={imageBlock.imageUrl}
               alt={imageBlock.alt || imageBlock.title}
               fill
-              className="object-cover rounded-lg"
+              className="object-cover"
+              sizes="(max-width: 4096px) 100vw"
+              priority
             />
           </div>
         </div>
@@ -60,27 +61,32 @@ export function renderBlock(block: ContentBlock) {
 
     case "list":
       const listBlock = block as ListField;
+      // Check if this is a faculty list (more than 10 items triggers flip)
+      const isFacultyList = listBlock.items.length > 10;
+
+      if (isFacultyList) {
+        return <FlipableFacultyList block={listBlock} />;
+      }
+
       return (
-        <div
-          className="p-10 ml-4 h-full"
-          style={{
-            backgroundColor: block.backgroundColor,
-            color: block.textColor,
-          }}
-        >
-          <h3 className="mb-2 text-xl font-semibold">{block.title}</h3>
+        <div className="h-full flex flex-col">
+          {block.title && (
+            <h3 className="text-3xl font-bold mb-3 shrink-0 truncate">
+              {block.title}
+            </h3>
+          )}
           <ul
             className={cn(
-              "list-inside px-2",
+              "list-inside overflow-auto flex-1 space-y-2 text-2xl scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent",
               listBlock.listStyle === "number"
-                ? "list-decimal text-sm"
+                ? "list-decimal"
                 : listBlock.listStyle === "bullet"
                 ? "list-disc"
                 : "list-none"
             )}
           >
             {listBlock.items.map((item, index) => (
-              <li key={index} className="mb-3">
+              <li key={index} className="leading-relaxed">
                 {item}
               </li>
             ))}
@@ -91,37 +97,48 @@ export function renderBlock(block: ContentBlock) {
     case "weather":
       const weatherBlock = block as WeatherField;
       return (
-        <div className="p-4">
-          <h3 className="mb-2 text-xl font-semibold">{block.title}</h3>
-          <WeatherWidget
-            location={weatherBlock.location}
-            unit={weatherBlock.unit}
-          />
+        <div className="h-full flex flex-col">
+          {block.title && (
+            <h3 className="text-3xl font-bold mb-3 shrink-0 truncate">
+              {block.title}
+            </h3>
+          )}
+          <div className="flex-1">
+            <WeatherWidget
+              location={weatherBlock.location}
+              unit={weatherBlock.unit}
+            />
+          </div>
         </div>
       );
 
     case "time":
       const timeBlock = block as TimeField;
       return (
-        <div
-          className="p-4 flex flex-col items-center justify-center h-full"
-          style={commonStyles}
-        >
-          <h3 className="mb-2 text-xl font-semibold">{block.title}</h3>
-          <div className="flex flex-col items-center">
+        <div className="h-full flex flex-col items-center justify-center px-2">
+          {block.title && (
+            <h3 className="text-4xl font-bold mb-3 shrink-0 text-center">
+              {block.title}
+            </h3>
+          )}
+          <div className="flex items-center justify-center w-full">
             <TimeWidget
               format={timeBlock.format}
               showSeconds={timeBlock.showSeconds}
-              className={cn(
-                "font-bold flex items-center justify-center text-6xl"
-              )}
+              className="font-bold leading-none"
+              style={{ fontSize: "clamp(3rem, 12vw, 10rem)" }}
             />
           </div>
         </div>
       );
 
     case "faculty":
-      return <FacultySection />;
+      // Faculty is now handled as a list block with >10 items
+      return (
+        <div className="h-full flex items-center justify-center text-2xl text-white/50">
+          Please use List Block for faculty names
+        </div>
+      );
 
     case "staff":
       return <StaffPositions block={block as StaffField} />;
@@ -139,16 +156,20 @@ export function renderBlock(block: ContentBlock) {
       }
 
       return (
-        <div className="p-4 h-full flex flex-col" style={commonStyles}>
-          <h3 className="mb-4 text-2xl font-semibold">{block.title}</h3>
-          <div className="overflow-auto flex-1">
-            <table className="w-full border-collapse table-fixed">
-              <thead>
-                <tr className="bg-black/10">
+        <div className="h-full flex flex-col">
+          {block.title && (
+            <h3 className="text-3xl font-bold mb-3 shrink-0 truncate">
+              {block.title}
+            </h3>
+          )}
+          <div className="overflow-auto flex-1 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+            <table className="w-full border-collapse">
+              <thead className="sticky top-0">
+                <tr className="bg-black/20">
                   {tableBlock.headers.map((header, index) => (
                     <th
                       key={index}
-                      className="border-2 p-3 text-left font-bold"
+                      className="border border-white/10 p-3 text-left font-bold text-xl"
                     >
                       {header}
                     </th>
@@ -159,10 +180,13 @@ export function renderBlock(block: ContentBlock) {
                 {parsedRows.map((row, rowIndex) => (
                   <tr
                     key={rowIndex}
-                    className={rowIndex % 2 === 0 ? "bg-black/5" : ""}
+                    className={rowIndex % 2 === 0 ? "bg-black/5" : "bg-white/5"}
                   >
                     {row.map((cell, cellIndex) => (
-                      <td key={cellIndex} className="border-2 p-3">
+                      <td
+                        key={cellIndex}
+                        className="border border-white/10 p-3 text-lg"
+                      >
                         {cell}
                       </td>
                     ))}
@@ -178,7 +202,11 @@ export function renderBlock(block: ContentBlock) {
       return <ImageCarouselBlock block={block as CarouselField} />;
 
     default:
-      return <div>Unsupported block type</div>;
+      return (
+        <div className="h-full flex items-center justify-center text-xl text-white/50">
+          Unsupported block type
+        </div>
+      );
   }
 }
 
@@ -204,13 +232,20 @@ export function StaffPositions({ block }: { block: StaffField }) {
   }, []);
 
   return (
-    <div className="p-6">
-      <h3 className="mb-4 text-xl font-semibold">{block.title}</h3>
-      <div className="space-y-2">
+    <div className="h-full flex flex-col">
+      {block.title && (
+        <h3 className="text-3xl font-bold mb-4 shrink-0 truncate">
+          {block.title}
+        </h3>
+      )}
+      <div className="flex-1 overflow-auto space-y-3 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
         {positions.map((pos, idx) => (
-          <div key={idx} className="flex justify-between">
-            <span>{pos.position}:</span>
-            <span>{pos.count}</span>
+          <div
+            key={idx}
+            className="flex justify-between items-center text-2xl leading-relaxed px-2 py-1 rounded-lg hover:bg-white/5 transition-colors"
+          >
+            <span className="font-medium">{pos.position}</span>
+            <span className="font-bold text-3xl">{pos.count}</span>
           </div>
         ))}
       </div>
@@ -310,45 +345,62 @@ export function NewsTickerBlock({ block }: { block: NewsField }) {
   };
 
   return (
-    <div className="flex items-center h-full w-full">
+    <div className="flex items-stretch h-full w-full overflow-hidden">
       {block.showNifty && niftyData && (
-        <div className="flex h-full items-center bg-red-600 px-4 whitespace-nowrap">
-          <span>NIFTY50</span>
-          <span className="ml-2">
-            {niftyData.last} {niftyData.percentChange > 0 ? "▲" : "▼"}
-          </span>
+        <div
+          className="flex items-center justify-center bg-gradient-to-br from-red-600 to-red-700 px-4 sm:px-6 shrink-0 shadow-lg"
+          style={{ minWidth: "clamp(120px, 15%, 200px)" }}
+        >
+          <div className="text-center">
+            <p className="text-sm sm:text-base md:text-lg font-semibold mb-1">
+              NIFTY50
+            </p>
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold">
+              {niftyData.last.toFixed(2)}
+            </p>
+            <p
+              className={cn(
+                "text-base sm:text-lg md:text-xl font-semibold",
+                niftyData.percentChange > 0 ? "text-green-200" : "text-red-200"
+              )}
+            >
+              {niftyData.percentChange > 0 ? "▲" : "▼"}{" "}
+              {Math.abs(niftyData.percentChange).toFixed(2)}%
+            </p>
+          </div>
         </div>
       )}
 
       <div
-        className="flex-1 p-4 overflow-hidden"
+        className="flex-1 flex items-center justify-center px-3 sm:px-4 md:px-6 overflow-hidden transition-opacity duration-1000"
         style={{
-          transition: "opacity 1s ease-in-out",
           opacity: displayFadeState ? 1 : 0,
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
         }}
       >
         {isShowingNews && newsData.length > 0 ? (
-          <div className="w-full text-center">
-            <h4 className="text-2xl font-medium">
+          <div className="w-full text-center px-2">
+            <h4 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold leading-snug line-clamp-2 sm:line-clamp-3">
               {newsData[currentDisplayIndex]?.title || "Loading news..."}
             </h4>
           </div>
         ) : weatherData ? (
-          <div className="flex justify-between items-center w-full">
-            <div className="text-center px-4">
-              <p className="text-3xl">
+          <div className="flex flex-col sm:flex-row justify-around items-center w-full gap-3 sm:gap-4 md:gap-6">
+            <div className="text-center flex-1">
+              <p className="text-sm sm:text-base md:text-xl lg:text-2xl font-semibold text-white/80 mb-1">
+                Day
+              </p>
+              <p className="text-2xl sm:text-3xl md:text-4xl font-bold">
                 {new Date(weatherData.EpochDateTime * 1000).toLocaleString(
                   "default",
                   { weekday: "long" }
                 )}
               </p>
             </div>
-            <div className="text-center px-4">
-              <p className="text-6xl font-bold">
+            <div className="text-center flex-1">
+              <p className="text-sm sm:text-base md:text-xl lg:text-2xl font-semibold text-white/80 mb-1">
+                Temperature
+              </p>
+              <p className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
                 {weatherData.Temperature
                   ? fahrenheitToCelsius(weatherData.Temperature.Value).toFixed(
                       0
@@ -356,12 +408,15 @@ export function NewsTickerBlock({ block }: { block: NewsField }) {
                   : "--"}
                 °C
               </p>
-              <p className="text-6xl">
+              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl mt-1 sm:mt-2 font-medium">
                 {weatherData.IconPhrase || "Weather unavailable"}
               </p>
             </div>
-            <div className="text-center px-4">
-              <p className="text-6xl">
+            <div className="text-center flex-1">
+              <p className="text-sm sm:text-base md:text-xl lg:text-2xl font-semibold text-white/80 mb-1">
+                Date
+              </p>
+              <p className="text-2xl sm:text-3xl md:text-4xl font-bold">
                 {new Date(weatherData.EpochDateTime * 1000).toLocaleString(
                   "default",
                   { month: "short" }
@@ -375,10 +430,141 @@ export function NewsTickerBlock({ block }: { block: NewsField }) {
           </div>
         ) : (
           <div className="w-full text-center">
-            <p className="text-xl">Loading data...</p>
+            <p className="text-lg sm:text-xl md:text-2xl text-white/50">
+              Loading data...
+            </p>
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// Flipable Faculty List Component (for lists with >10 items)
+export function FlipableFacultyList({ block }: { block: ListField }) {
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isFlipping, setIsFlipping] = useState(false);
+
+  const items = block.items || [];
+  const FLIP_INTERVAL = 10000; // 10 seconds
+
+  // Calculate items per page (half of total for >10 items)
+  const itemsPerPage = Math.ceil(items.length / 2);
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+
+  // Auto-flip pages
+  useEffect(() => {
+    if (totalPages <= 1) return;
+
+    const interval = setInterval(() => {
+      setIsFlipping(true);
+
+      setTimeout(() => {
+        setCurrentPage((prev) => (prev + 1) % totalPages);
+        setIsFlipping(false);
+      }, 600);
+    }, FLIP_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [totalPages]);
+
+  // Get current page items
+  const startIndex = currentPage * itemsPerPage;
+  const currentPageItems = items.slice(startIndex, startIndex + itemsPerPage);
+
+  return (
+    <div className="h-full flex flex-col p-2">
+      <div className="flex items-center justify-between mb-4 shrink-0">
+        <h3 className="text-4xl font-bold truncate bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+          {block.title}
+        </h3>
+        {totalPages > 1 && (
+          <div className="flex gap-2.5">
+            {Array.from({ length: totalPages }).map((_, idx) => (
+              <div
+                key={idx}
+                className={cn(
+                  "h-2.5 rounded-full transition-all duration-300 shadow-lg",
+                  idx === currentPage
+                    ? "bg-gradient-to-r from-blue-400 to-purple-400 w-12"
+                    : "bg-white/30 w-2.5"
+                )}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-hidden" style={{ perspective: "2000px" }}>
+        <div
+          className="h-full flex flex-col gap-3 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent transition-all duration-600 ease-in-out"
+          style={{
+            transform: isFlipping ? "rotateY(90deg)" : "rotateY(0deg)",
+            transformStyle: "preserve-3d",
+            opacity: isFlipping ? 0 : 1,
+          }}
+        >
+          {currentPageItems.map((item, idx) => {
+            // Parse faculty name and designation
+            const parts = item.split(/,(?=[^,]+$)/); // Split on last comma
+            const name = parts[0]?.trim() || item;
+            const designation = parts[1]?.trim() || "";
+
+            return (
+              <div
+                key={idx}
+                className={cn(
+                  "group relative rounded-2xl overflow-hidden",
+                  "bg-gradient-to-br from-white/20 via-white/10 to-white/5",
+                  "backdrop-blur-md border-2 border-white/30",
+                  "hover:from-white/25 hover:via-white/15 hover:border-white/40",
+                  "transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl",
+                  "flex flex-col justify-center p-6"
+                )}
+                style={{
+                  animationDelay: `${idx * 80}ms`,
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+                }}
+              >
+                {/* Gradient accent line */}
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" />
+
+                {/* Serial Number */}
+                {/* <div className="absolute top-3 right-4 text-black/60 text-xl font-bold">
+                  {String(startIndex + idx + 1).padStart(2, '0')}
+                </div> */}
+
+                {/* Content */}
+                <div className="relative z-10">
+                  <h4 className="text-5xl font-bold mb-2 leading-tight text-black">
+                    {name}
+                  </h4>
+                  {designation && (
+                    <p className="text-3xl font-semibold text-black leading-snug">
+                      {designation}
+                    </p>
+                  )}
+                </div>
+
+                {/* Hover effect glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 transition-all duration-500" />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {totalPages > 1 && (
+        <div className="text-center mt-3 shrink-0">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
+            <span className="text-xl font-bold text-white">
+              {currentPage + 1}
+            </span>
+            <span className="text-white/60">/</span>
+            <span className="text-lg text-white/80">{totalPages}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -422,7 +608,7 @@ export function ImageCarouselBlock({ block }: { block: CarouselField }) {
 
   if (loading) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
+      <div className="w-full h-full flex items-center justify-center text-2xl text-white/50">
         Loading images...
       </div>
     );
@@ -430,14 +616,14 @@ export function ImageCarouselBlock({ block }: { block: CarouselField }) {
 
   if (images.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
+      <div className="w-full h-full flex items-center justify-center text-2xl text-white/50">
         No images available
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full relative overflow-hidden rounded-lg">
+    <div className="w-full h-full relative overflow-hidden">
       {images.map((image, index) => (
         <div
           key={image.id}
@@ -453,18 +639,22 @@ export function ImageCarouselBlock({ block }: { block: CarouselField }) {
             fill
             className="object-cover"
             priority={index === currentImageIndex}
+            sizes="(max-width: 4096px) 100vw"
           />
         </div>
       ))}
 
       {/* Pagination dots */}
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-3 z-10">
         {images.map((_, index) => (
           <div
             key={index}
-            className={`h-3 w-3 rounded-full ${
-              index === currentImageIndex ? "bg-white" : "bg-white/50"
-            }`}
+            className={cn(
+              "h-4 w-4 rounded-full transition-all duration-300 shadow-lg",
+              index === currentImageIndex
+                ? "bg-white scale-125"
+                : "bg-white/40 hover:bg-white/60"
+            )}
           />
         ))}
       </div>

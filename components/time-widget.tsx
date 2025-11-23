@@ -5,12 +5,14 @@ interface TimeWidgetProps {
   format?: "12h" | "24h";
   showSeconds?: boolean;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export default function TimeWidget({
   format = "12h",
   showSeconds = true,
   className,
+  style,
 }: TimeWidgetProps) {
   const [time, setTime] = useState("");
 
@@ -55,12 +57,19 @@ export default function TimeWidget({
     const period = timeParts[1] || "";
 
     return (
-      <div className={className}>
+      <div className={className} style={style}>
         <span>{timeValue}</span>
-        {period && <span className="ml-10 font-bold align-top">{period}</span>}
+        {period && (
+          <span
+            className="ml-4 font-bold align-super opacity-90"
+            style={{ fontSize: "0.5em" }}
+          >
+            {period}
+          </span>
+        )}
       </div>
     );
   }
 
-  return <div className={className}>{time}</div>;
+  return <div className={className} style={style}>{time}</div>;
 }

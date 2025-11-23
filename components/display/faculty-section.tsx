@@ -54,19 +54,21 @@ export default function FacultySection() {
   }, [faculty, currentGroup]);
 
   return (
-    <div className="col-span-2 row-span-3 rounded-3xl bg-black p-6 text-white">
-      <h3 className="mb-4 text-xl font-semibold">Faculty</h3>
-      <div className="space-y-4">
+    <div className="h-full flex flex-col">
+      <h3 className="text-3xl font-bold mb-4 shrink-0">Faculty</h3>
+      <div className="flex-1 overflow-auto space-y-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
         {currentGroup.map((member) => (
           <div
             key={member.id}
             className={cn(
-              "transition-opacity duration-1000",
+              "transition-opacity duration-1000 p-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10",
               fadeState === "fade-in" ? "opacity-100" : "opacity-0"
             )}
           >
-            <h4 className="text-lg">{member.name}</h4>
-            <span className="rounded bg-white px-2 py-1 text-sm text-black">
+            <h4 className="text-2xl font-semibold mb-2 truncate">
+              {member.name}
+            </h4>
+            <span className="inline-block rounded-full bg-white px-4 py-1.5 text-lg font-medium text-black shadow-md">
               {member.specializedIn}
             </span>
           </div>
