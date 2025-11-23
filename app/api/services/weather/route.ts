@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const response = await fetch(
-      "https://dataservice.accuweather.com/forecasts/v1/hourly/1hour/188802?apikey=zpka_6c7285b3f2474d8598854794a4d7330a_fcda23ec",
+      `https://dataservice.accuweather.com/forecasts/v1/hourly/1hour/188802?apikey=${process.env.NEXT_PUBLIC_ACCUWEATHER_API_KEY}`,
       {
         next: { revalidate: 300 }, // Cache for 5 minutes
       }
