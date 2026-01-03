@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import {
   ContentBlock,
   TextField,
@@ -635,17 +636,24 @@ export function ImageCarouselBlock({ block }: { block: CarouselField }) {
         >
           <Image
             src={image.imageUrl}
-            alt={`Slide ${index + 1}`}
+            alt={`Slide ${index + 1} background`}
             fill
-            className="object-cover"
+            className="object-cover blur-xl scale-110"
             priority={index === currentImageIndex}
             sizes="(max-width: 4096px) 100vw"
           />
+          <div className="absolute inset-0 flex items-center justify-center z-20">
+            <img
+              src={image.imageUrl}
+              alt={`Slide ${index + 1}`}
+              className="max-w-full max-h-full object-contain"
+            />
+          </div>
         </div>
       ))}
 
       {/* Pagination dots */}
-      <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-3 z-10">
+      <div className="absolute w-full z-10 h-full flex items-end justify-center gap-3">
         {images.map((_, index) => (
           <div
             key={index}
