@@ -476,10 +476,8 @@ export function FlipableFacultyList({ block }: { block: ListField }) {
   return (
     <div className="h-full flex flex-col p-2">
       <div className="flex items-center justify-between mb-4 shrink-0">
-        <h3 className="text-4xl font-bold truncate bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-          {block.title}
-        </h3>
-        {totalPages > 1 && (
+        <h3 className="text-3xl font-bold truncate">{block.title}</h3>
+        {/* {totalPages > 1 && (
           <div className="flex gap-2.5">
             {Array.from({ length: totalPages }).map((_, idx) => (
               <div
@@ -493,7 +491,7 @@ export function FlipableFacultyList({ block }: { block: ListField }) {
               />
             ))}
           </div>
-        )}
+        )} */}
       </div>
 
       <div className="flex-1 overflow-hidden" style={{ perspective: "2000px" }}>
@@ -528,7 +526,7 @@ export function FlipableFacultyList({ block }: { block: ListField }) {
                 }}
               >
                 {/* Gradient accent line */}
-                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" />
+                {/* <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" /> */}
 
                 {/* Serial Number */}
                 {/* <div className="absolute top-3 right-4 text-black/60 text-xl font-bold">
@@ -548,7 +546,7 @@ export function FlipableFacultyList({ block }: { block: ListField }) {
                 </div>
 
                 {/* Hover effect glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 transition-all duration-500" />
+                <div className="absolute transition-all duration-500" />
               </div>
             );
           })}
