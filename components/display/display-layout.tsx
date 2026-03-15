@@ -59,6 +59,7 @@ interface CarouselImage {
 
 // ─────────────────── Helpers ───────────────────
 const GRAD = "linear-gradient(160deg, #3b2fa0 0%, #5b3ec8 35%, #6d3bbd 60%, #4e2a9a 100%)";
+const NEWS_TICKER_HEIGHT = "clamp(110px,14vw,125px)";
 
 function WeatherTimePill() {
   const [time, setTime] = useState("");
@@ -202,6 +203,7 @@ function FacultyCard({ members }: { members: FacultyMember[] }) {
         display: "flex",
         flexDirection: "column",
         gap: "clamp(8px,1.5vw,14px)",
+        flex: 1,
         height: "100%",
         overflow: "hidden",
         opacity: fading ? 0 : 1,
@@ -267,10 +269,14 @@ function NewsTickerBottom() {
   return (
     <div
       style={{
+        height: "100%",
         background: "rgba(20,16,50,0.82)",
         backdropFilter: "blur(12px)",
         borderRadius: "16px",
         padding: "clamp(10px,2vw,18px) clamp(16px,3vw,32px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         color: "#fff",
         fontSize: "clamp(0.8rem,2vw,1.15rem)",
         fontWeight: 500,
@@ -317,36 +323,123 @@ function ImageCarousel({ images }: { images: CarouselImage[] }) {
 
   return (
     <div
-  style={{
-    width: "100%",
-    aspectRatio: "3 / 4",
-    position: "relative",
-    borderRadius: "20px",
-    overflow: "hidden", // important
-    background: "#ffffff"  // optional (fills empty space from contain)
-  }}
->
-  {images.map((img, i) => (
-    <img
-      key={img.id}
-      src={img.imageUrl}
-      alt={`photo-${i}`}
       style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
         height: "100%",
-        objectFit: "contain",
-        display: "block",
-        opacity: i === idx ? 1 : 0,
-        transition: "opacity 1s ease"
+        width: "auto",
+        maxWidth: "100%",
+        aspectRatio: "3 / 4",
+        position: "relative",
+        borderRadius: "20px",
+        overflow: "hidden",
+        background: "#ffffff",
       }}
-    />
-  ))}
-</div>
+    >
+      {images.map((img, i) => (
+        <img
+          key={img.id}
+          src={img.imageUrl}
+          alt={`photo-${i}`}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            display: "block",
+            opacity: i === idx ? 1 : 0,
+            transition: "opacity 1s ease",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
+function DepartmentHighlights({
+  batchYear,
+  studentCount,
+  placements,
+  higherStudy,
+}: {
+  batchYear?: string;
+  studentCount?: string;
+  placements?: string;
+  higherStudy?: string;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "clamp(6px,1vw,10px)",
+      }}
+    >
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "clamp(6px,1vw,10px)",
+        }}
+      >
+        <div
+          style={{
+            background: "rgba(30,20,80,0.75)",
+            backdropFilter: "blur(10px)",
+            borderRadius: "14px",
+            padding: "clamp(8px,1.5vw,14px) clamp(10px,2vw,18px)",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <div style={{ fontSize: "clamp(0.55rem,1.2vw,0.8rem)", color: "rgba(255,255,255,0.55)", marginBottom: "2px" }}>Batch</div>
+          <div style={{ fontSize: "clamp(1rem,3vw,2rem)", fontWeight: 800, color: "#fff" }}>{batchYear ?? "—"}</div>
+        </div>
 
+        <div
+          style={{
+            background: "rgba(30,20,80,0.75)",
+            backdropFilter: "blur(10px)",
+            borderRadius: "14px",
+            padding: "clamp(8px,1.5vw,14px) clamp(10px,2vw,18px)",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <div style={{ fontSize: "clamp(0.55rem,1.2vw,0.8rem)", color: "rgba(255,255,255,0.55)", marginBottom: "2px" }}>No of Students</div>
+          <div style={{ fontSize: "clamp(1rem,3vw,2rem)", fontWeight: 800, color: "#fff" }}>{studentCount ?? "—"}</div>
+        </div>
+      </div>
 
+      <div
+        style={{
+          background: "#ffffff",
+          borderRadius: "14px",
+          padding: "clamp(8px,1.5vw,14px) clamp(12px,2vw,22px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ fontSize: "clamp(0.85rem,2.2vw,1.4rem)", fontWeight: 600, color: "#1a1a2e" }}>Placements</span>
+        <span style={{ fontSize: "clamp(1.2rem,3.5vw,2.2rem)", fontWeight: 900, color: "#1a1a2e", borderLeft: "3px solid #1a1a2e", paddingLeft: "14px" }}>
+          {placements ?? "—"}
+        </span>
+      </div>
+
+      <div
+        style={{
+          background: "#ffffff",
+          borderRadius: "14px",
+          padding: "clamp(8px,1.5vw,14px) clamp(12px,2vw,22px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ fontSize: "clamp(0.85rem,2.2vw,1.4rem)", fontWeight: 600, color: "#1a1a2e" }}>Higher Study</span>
+        <span style={{ fontSize: "clamp(1.2rem,3.5vw,2.2rem)", fontWeight: 900, color: "#1a1a2e", borderLeft: "3px solid #1a1a2e", paddingLeft: "14px" }}>
+          {higherStudy ?? "—"}
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -367,6 +460,11 @@ export default function DisplayLayout() {
   const [positions, setPositions] = useState<StaffPosition[]>([]);
   const [faculty, setFaculty] = useState<FacultyMember[]>([]);
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+
+  const displayTitle =
+    settings.title?.trim().toUpperCase() === "ELECTRONICS AND COMPUTER ENGINEERING"
+      ? "Electronics and Computer Engineering"
+      : settings.title;
 
   // Settings
   useEffect(() => {
@@ -498,7 +596,7 @@ export default function DisplayLayout() {
               letterSpacing: "-0.01em",
             }}
           >
-            {settings.title}
+            {displayTitle}
           </div>
         </div>
       </div>
@@ -525,6 +623,7 @@ export default function DisplayLayout() {
         style={{
           display: "flex",
           gap: "clamp(8px,1.5vw,14px)",
+          alignItems: "stretch",
           flex: 1,
           minHeight: 0,
           position: "relative",
@@ -532,7 +631,7 @@ export default function DisplayLayout() {
         }}
       >
         {/* Left: Faculty list */}
-        <div style={{ flex: "0 0 48%", minWidth: 0, minHeight: 0 }}>
+        <div style={{ flex: "0 0 42%", minWidth: 0, minHeight: 0, height: "100%", display: "flex", alignSelf: "stretch" }}>
           <FacultyCard members={faculty} />
         </div>
 
@@ -540,90 +639,31 @@ export default function DisplayLayout() {
         <div
           style={{
             flex: 1,
+            height: "100%",
             display: "flex",
             flexDirection: "column",
-            gap: "clamp(8px,1.5vw,14px)",
+            gap: "clamp(2px,0.4vw,6px)",
             minWidth: 0,
+            minHeight: 0,
+            alignSelf: "stretch",
           }}
         >
           {/* Photo */}
-          <div style={{ flex: 1, minHeight: 0 }}>
+          <div style={{ flex: 1, minHeight: 0, display: "flex", alignItems: "flex-start", justifyContent: "center" }}>
             <ImageCarousel images={carouselImages} />
           </div>
 
-          {/* Batch + Student count */}
-          <div
-            style={{
-              display: "flex",
-              gap: "clamp(6px,1vw,10px)",
-            }}
-          >
-            <div
-              style={{
-                flex: 1,
-                background: "rgba(30,20,80,0.75)",
-                backdropFilter: "blur(10px)",
-                borderRadius: "14px",
-                padding: "clamp(8px,1.5vw,14px) clamp(10px,2vw,18px)",
-                border: "1px solid rgba(255,255,255,0.1)",
-              }}
-            >
-              <div style={{ fontSize: "clamp(0.55rem,1.2vw,0.8rem)", color: "rgba(255,255,255,0.55)", marginBottom: "2px" }}>Batch</div>
-              <div style={{ fontSize: "clamp(1rem,3vw,2rem)", fontWeight: 800, color: "#fff" }}>{settings.batchYear ?? "—"}</div>
-            </div>
-            <div
-              style={{
-                flex: 1,
-                background: "rgba(30,20,80,0.75)",
-                backdropFilter: "blur(10px)",
-                borderRadius: "14px",
-                padding: "clamp(8px,1.5vw,14px) clamp(10px,2vw,18px)",
-                border: "1px solid rgba(255,255,255,0.1)",
-              }}
-            >
-              <div style={{ fontSize: "clamp(0.55rem,1.2vw,0.8rem)", color: "rgba(255,255,255,0.55)", marginBottom: "2px" }}>No of Students</div>
-              <div style={{ fontSize: "clamp(1rem,3vw,2rem)", fontWeight: 800, color: "#fff" }}>{settings.studentCount ?? "—"}</div>
-            </div>
-          </div>
-
-          {/* Placements */}
-          <div
-            style={{
-              background: "#ffffff",
-              borderRadius: "14px",
-              padding: "clamp(8px,1.5vw,14px) clamp(12px,2vw,22px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <span style={{ fontSize: "clamp(0.85rem,2.2vw,1.4rem)", fontWeight: 600, color: "#1a1a2e" }}>Placements</span>
-            <span style={{ fontSize: "clamp(1.2rem,3.5vw,2.2rem)", fontWeight: 900, color: "#1a1a2e", borderLeft: "3px solid #1a1a2e", paddingLeft: "14px" }}>
-              {settings.placements ?? "—"}
-            </span>
-          </div>
-
-          {/* Higher Study */}
-          <div
-            style={{
-              background: "#ffffff",
-              borderRadius: "14px",
-              padding: "clamp(8px,1.5vw,14px) clamp(12px,2vw,22px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <span style={{ fontSize: "clamp(0.85rem,2.2vw,1.4rem)", fontWeight: 600, color: "#1a1a2e" }}>Higher Study</span>
-            <span style={{ fontSize: "clamp(1.2rem,3.5vw,2.2rem)", fontWeight: 900, color: "#1a1a2e", borderLeft: "3px solid #1a1a2e", paddingLeft: "14px" }}>
-              {settings.higherStudy ?? "—"}
-            </span>
-          </div>
+          <DepartmentHighlights
+            batchYear={settings.batchYear}
+            studentCount={settings.studentCount}
+            placements={settings.placements}
+            higherStudy={settings.higherStudy}
+          />
         </div>
       </div>
 
       {/* ── Row 5: News Ticker ── */}
-      <div style={{ position: "relative", zIndex: 1, flexShrink: 0 }}>
+      <div style={{ position: "relative", zIndex: 0, flexShrink: 0, height: NEWS_TICKER_HEIGHT }}>
         <NewsTickerBottom />
       </div>
     </div>
