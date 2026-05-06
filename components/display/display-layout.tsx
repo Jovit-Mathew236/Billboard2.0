@@ -94,26 +94,26 @@ function WeatherTimePill() {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: "1.9vh",
+        gap: "2.9vh",
         background: "rgba(30,24,60,0.72)",
         backdropFilter: "blur(14px)",
         borderRadius: 999,
-        padding: "0.93vh 2.6vh",
+        padding: "1.4vh 3.9vh",
         border: "1px solid rgba(255,255,255,0.18)",
-        fontSize: "1.6vh",
+        fontSize: "2.4vh",
         color: "#fff",
         fontWeight: 500,
         letterSpacing: "0.01em",
         whiteSpace: "nowrap",
       }}
     >
-      <span style={{ display: "inline-flex", alignItems: "center", gap: "0.74vh" }}>
-        <Sun style={{ width: "1.7vh", height: "1.7vh" }} strokeWidth={2.25} />
+      <span style={{ display: "inline-flex", alignItems: "center", gap: "1.1vh" }}>
+        <Sun style={{ width: "2.5vh", height: "2.5vh" }} strokeWidth={2.25} />
         <span>{condition}{tempC ? ` · ${tempC}°C` : ""}</span>
       </span>
       <span style={{ opacity: 0.35 }}>|</span>
-      <span style={{ display: "inline-flex", alignItems: "center", gap: "0.74vh" }}>
-        <Clock3 style={{ width: "1.7vh", height: "1.7vh" }} strokeWidth={2.25} />
+      <span style={{ display: "inline-flex", alignItems: "center", gap: "1.1vh" }}>
+        <Clock3 style={{ width: "2.5vh", height: "2.5vh" }} strokeWidth={2.25} />
         <span>{time}</span>
       </span>
     </div>
@@ -127,37 +127,30 @@ function StaffStatCard({ position, count }: StaffPosition) {
       style={{
         background: "rgba(255,255,255,0.13)",
         backdropFilter: "blur(10px)",
-        borderRadius: "1.5vh",
+        borderRadius: "2.2vh",
         border: "1px solid rgba(255,255,255,0.16)",
-        padding: "1.3vh 1.7vh",
+        padding: "1.9vh 2.5vh",
         display: "flex",
         flexDirection: "column",
-        gap: "0.55vh",
+        gap: "0.85vh",
         flex: 1,
         minWidth: 0,
       }}
     >
       <div
         style={{
-          fontSize: "1.2vh",
+          fontSize: "1.8vh",
           color: "rgba(255,255,255,0.6)",
           display: "flex",
           alignItems: "center",
-          gap: "0.55vh",
+          gap: "0.85vh",
           whiteSpace: "nowrap",
         }}
       >
-        <GraduationCap style={{ width: "1.3vh", height: "1.3vh" }} strokeWidth={2.25} />
+        <GraduationCap style={{ width: "1.9vh", height: "1.9vh" }} strokeWidth={2.25} />
         <span>{position}</span>
       </div>
-      <div
-        style={{
-          fontSize: "3.9vh",
-          fontWeight: 800,
-          color: "#fff",
-          lineHeight: 1,
-        }}
-      >
+      <div style={{ fontSize: "5.8vh", fontWeight: 800, color: "#fff", lineHeight: 1 }}>
         {count}
       </div>
     </div>
@@ -172,9 +165,9 @@ function DegreeBadge({ label }: { label: string }) {
         display: "inline-block",
         background: "rgba(90,60,200,0.12)",
         border: "1px solid rgba(90,60,200,0.28)",
-        borderRadius: "0.55vh",
-        padding: "0.19vh 0.83vh",
-        fontSize: "1vh",
+        borderRadius: "0.85vh",
+        padding: "0.3vh 1.25vh",
+        fontSize: "1.5vh",
         color: "#4a3aaa",
         fontWeight: 600,
         lineHeight: 1.5,
@@ -211,11 +204,11 @@ function FacultyCard({ members }: { members: FacultyMember[] }) {
     <div
       style={{
         background: "#fff",
-        borderRadius: "1.85vh",
-        padding: "1.85vh 2vh",
+        borderRadius: "2.75vh",
+        padding: "2.75vh 3vh",
         display: "flex",
         flexDirection: "column",
-        gap: "0.93vh",
+        gap: "1.4vh",
         width: "100%",
         height: "100%",
         overflow: "hidden",
@@ -227,18 +220,11 @@ function FacultyCard({ members }: { members: FacultyMember[] }) {
       {slice.map((m) => {
         const degrees = (m.specializedIn ?? "").split(",").filter(Boolean);
         return (
-          <div key={m.id} style={{ display: "flex", flexDirection: "column", gap: "0.37vh" }}>
-            <div
-              style={{
-                fontSize: "1.56vh",
-                fontWeight: 700,
-                color: "#2d1fa3",
-                lineHeight: 1.2,
-              }}
-            >
+          <div key={m.id} style={{ display: "flex", flexDirection: "column", gap: "0.55vh" }}>
+            <div style={{ fontSize: "2.35vh", fontWeight: 700, color: "#2d1fa3", lineHeight: 1.2 }}>
               {m.name}
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.37vh" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.55vh" }}>
               {degrees.map((d, i) => (
                 <DegreeBadge key={i} label={d} />
               ))}
@@ -325,98 +311,24 @@ function DepartmentHighlights({
   higherStudy?: string;
 }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.74vh",
-        flexShrink: 0,
-      }}
-    >
-      {/* Batch + No of Students — side by side dark tiles */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.74vh" }}>
-        <div
-          style={{
-            background: "rgba(20,14,60,0.82)",
-            backdropFilter: "blur(10px)",
-            borderRadius: "1.3vh",
-            padding: "0.93vh 1.3vh",
-            border: "1px solid rgba(255,255,255,0.1)",
-          }}
-        >
-          <div style={{ fontSize: "0.89vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.28vh", letterSpacing: "0.04em" }}>
-            Batch
-          </div>
-          <div style={{ fontSize: "2vh", fontWeight: 800, color: "#fff" }}>
-            {batchYear ?? "—"}
-          </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.1vh", flexShrink: 0 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.1vh" }}>
+        <div style={{ background: "rgba(20,14,60,0.82)", backdropFilter: "blur(10px)", borderRadius: "1.9vh", padding: "1.4vh 1.9vh", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <div style={{ fontSize: "1.3vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.42vh", letterSpacing: "0.04em" }}>Batch</div>
+          <div style={{ fontSize: "3vh", fontWeight: 800, color: "#fff" }}>{batchYear ?? "—"}</div>
         </div>
-        <div
-          style={{
-            background: "rgba(20,14,60,0.82)",
-            backdropFilter: "blur(10px)",
-            borderRadius: "1.3vh",
-            padding: "0.93vh 1.3vh",
-            border: "1px solid rgba(255,255,255,0.1)",
-          }}
-        >
-          <div style={{ fontSize: "0.89vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.28vh", letterSpacing: "0.04em" }}>
-            No of Students
-          </div>
-          <div style={{ fontSize: "2vh", fontWeight: 800, color: "#fff" }}>
-            {studentCount ?? "—"}
-          </div>
+        <div style={{ background: "rgba(20,14,60,0.82)", backdropFilter: "blur(10px)", borderRadius: "1.9vh", padding: "1.4vh 1.9vh", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <div style={{ fontSize: "1.3vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.42vh", letterSpacing: "0.04em" }}>No of Students</div>
+          <div style={{ fontSize: "3vh", fontWeight: 800, color: "#fff" }}>{studentCount ?? "—"}</div>
         </div>
       </div>
-
-      {/* Placements — white tile */}
-      <div
-        style={{
-          background: "#ffffff",
-          borderRadius: "1.3vh",
-          padding: "0.93vh 1.48vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <span style={{ fontSize: "1.56vh", fontWeight: 600, color: "#1a1a2e" }}>Placements</span>
-        <span
-          style={{
-            fontSize: "2.2vh",
-            fontWeight: 900,
-            color: "#1a1a2e",
-            borderLeft: "0.28vh solid #1a1a2e",
-            paddingLeft: "1.3vh",
-          }}
-        >
-          {placements ?? "—"}
-        </span>
+      <div style={{ background: "#ffffff", borderRadius: "1.9vh", padding: "1.4vh 2.2vh", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Placements</span>
+        <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{placements ?? "—"}</span>
       </div>
-
-      {/* Higher Study — white tile */}
-      <div
-        style={{
-          background: "#ffffff",
-          borderRadius: "1.3vh",
-          padding: "0.93vh 1.48vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <span style={{ fontSize: "1.56vh", fontWeight: 600, color: "#1a1a2e" }}>Higher Study</span>
-        <span
-          style={{
-            fontSize: "2.2vh",
-            fontWeight: 900,
-            color: "#1a1a2e",
-            borderLeft: "0.28vh solid #1a1a2e",
-            paddingLeft: "1.3vh",
-          }}
-        >
-          {higherStudy ?? "—"}
-        </span>
+      <div style={{ background: "#ffffff", borderRadius: "1.9vh", padding: "1.4vh 2.2vh", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Higher Study</span>
+        <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{higherStudy ?? "—"}</span>
       </div>
     </div>
   );
@@ -460,13 +372,13 @@ function NewsTickerBottom() {
         height: "100%",
         background: "rgba(18,14,48,0.85)",
         backdropFilter: "blur(14px)",
-        borderRadius: "1.5vh",
-        padding: "0 2.6vh",
+        borderRadius: "2.2vh",
+        padding: "0 3.9vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         color: "#fff",
-        fontSize: "1.5vh",
+        fontSize: "2.2vh",
         fontWeight: 500,
         textAlign: "center",
         lineHeight: 1.55,
@@ -556,8 +468,8 @@ export default function DisplayLayout() {
         letterSpacing: "-0.03em",
         display: "flex",
         flexDirection: "column",
-        padding: "1.9vh",
-        gap: "1.1vh",
+        padding: "2.9vh",
+        gap: "1.7vh",
       }}
     >
       {settings.backgroundImageUrl && (
@@ -574,7 +486,7 @@ export default function DisplayLayout() {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "1.9vh",
+          gap: "2.9vh",
           position: "relative",
           zIndex: 1,
           flexShrink: 0,
@@ -582,7 +494,7 @@ export default function DisplayLayout() {
       >
         <div
           style={{
-            fontSize: "5.6vh",
+            fontSize: "8.4vh",
             fontWeight: 900,
             color: "#fff",
             lineHeight: 1,
@@ -595,8 +507,8 @@ export default function DisplayLayout() {
 
         <div
           style={{
-            width: "0.28vh",
-            height: "6.5vh",
+            width: "0.42vh",
+            height: "9.6vh",
             background: "rgba(255,255,255,0.45)",
             borderRadius: "0.19vh",
             flexShrink: 0,
@@ -604,17 +516,17 @@ export default function DisplayLayout() {
         />
 
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: "1.48vh", color: "rgba(255,255,255,0.75)", fontWeight: 500, marginBottom: "0.19vh" }}>
+          <div style={{ fontSize: "2.2vh", color: "rgba(255,255,255,0.75)", fontWeight: 500, marginBottom: "0.19vh" }}>
             {settings.headerText}
           </div>
-          <div style={{ fontSize: "2.8vh", fontWeight: 400, color: "#fff", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
+          <div style={{ fontSize: "4.2vh", fontWeight: 400, color: "#fff", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
             {displayTitle}
           </div>
         </div>
       </div>
 
       {/* ── Row 3: Staff stat cards ── */}
-      <div style={{ display: "flex", gap: "0.93vh", position: "relative", zIndex: 1, flexShrink: 0 }}>
+      <div style={{ display: "flex", gap: "1.4vh", position: "relative", zIndex: 1, flexShrink: 0 }}>
         {positions.length > 0
           ? positions.map((p, i) => <StaffStatCard key={i} {...p} />)
           : ["PoP", "Asst Prof", "Asso Prof", "Technical Staff"].map((p) => (
@@ -661,7 +573,7 @@ export default function DisplayLayout() {
       </div>
 
       {/* ── Row 5: News ticker ── */}
-      <div style={{ height: "7vw", flexShrink: 0, position: "relative", zIndex: 1 }}>
+      <div style={{ height: "10.5vw", flexShrink: 0, position: "relative", zIndex: 1 }}>
         <NewsTickerBottom />
       </div>
     </div>
