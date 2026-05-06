@@ -29,6 +29,7 @@ import {
   onSnapshot,
   query,
   orderBy,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useTheme } from "next-themes";
@@ -140,6 +141,15 @@ type ContentBlock =
   | NewsField
   | TableField
   | CarouselField;
+
+interface BatchEntry {
+  id: string;
+  batchYear: string;
+  studentCount: string;
+  placements: string;
+  higherStudy: string;
+  order: number;
+}
 
 // Move renderBlockPreview before SortableBlock
 const renderBlockPreview = (block: ContentBlock) => {
@@ -330,6 +340,12 @@ const EditDashboard = () => {
     backgroundS3Key: "",
   });
 
+  // ── Batch management state ──
+  const [batchEntries, setBatchEntries] = useState<BatchEntry[]>([]);
+  const [newBatch, setNewBatch] = useState({ batchYear: "", studentCount: "", placements: "", higherStudy: "" });
+  const [editingBatchId, setEditingBatchId] = useState<string | null>(null);
+  const [editingBatchData, setEditingBatchData] = useState<Omit<BatchEntry, "id" | "order">>({ batchYear: "", studentCount: "", placements: "", higherStudy: "" });
+
   // --- Input string states for dimension fields ---
   const [widthInputValue, setWidthInputValue] = useState("");
   const [heightInputValue, setHeightInputValue] = useState("");
@@ -365,7 +381,7 @@ const EditDashboard = () => {
     }
   }, [editingBlock]); // This effect syncs input strings when editingBlock changes or dialog opens/closes
 
-  // ... (Load global settings useEffect remains the same) ...
+  // Load global settings
   useEffect(() => {
     const settingsRef = doc(db, "settings", "global");
     const unsubscribe = onSnapshot(settingsRef, (docSnapshot) => {
@@ -381,9 +397,57 @@ const EditDashboard = () => {
         }));
       }
     });
-
     return () => unsubscribe();
   }, []);
+
+  // Load batches
+  useEffect(() => {
+    const unsub = onSnapshot(query(collection(db, "batches")), (snap) => {
+      const entries = snap.docs
+        .map((d) => ({
+          id: d.id,
+          batchYear: d.data().batchYear ?? "",
+          studentCount: d.data().studentCount ?? "",
+          placements: d.data().placements ?? "",
+          higherStudy: d.data().higherStudy ?? "",
+          order: d.data().order ?? 0,
+        }))
+        .sort((a, b) => a.order - b.order);
+      setBatchEntries(entries);
+    });
+    return () => unsub();
+  }, []);
+
+  const addBatchEntry = async () => {
+    if (!newBatch.batchYear.trim()) return;
+    try {
+      await addDoc(collection(db, "batches"), {
+        ...newBatch,
+        order: batchEntries.length,
+      });
+      setNewBatch({ batchYear: "", studentCount: "", placements: "", higherStudy: "" });
+    } catch (e) {
+      console.error("Error adding batch:", e);
+    }
+  };
+
+  const saveBatchEdit = async () => {
+    if (!editingBatchId) return;
+    try {
+      await updateDoc(doc(db, "batches", editingBatchId), editingBatchData);
+      setEditingBatchId(null);
+    } catch (e) {
+      console.error("Error updating batch:", e);
+    }
+  };
+
+  const deleteBatchEntry = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "batches", id));
+    } catch (e) {
+      console.error("Error deleting batch:", e);
+    }
+  };
 
   // Load saved blocks from localStorage/Firebase
   useEffect(() => {
@@ -1004,6 +1068,137 @@ const EditDashboard = () => {
                   />
                 </div>
                 <Button onClick={updateGlobalSettings}>Save Settings</Button>
+              </div>
+            </div>
+
+            {/* ── Batch Management ── */}
+            <div className="mb-6 pb-6 border-b">
+              <h3 className="text-lg font-semibold mb-4">Batch Management</h3>
+              <p className="text-xs text-gray-500 mb-3">These rotate on the billboard every 8 seconds.</p>
+
+              {/* Existing batches */}
+              <div className="space-y-2 mb-4">
+                {batchEntries.length === 0 && (
+                  <p className="text-sm text-gray-400 italic">No batches added yet.</p>
+                )}
+                {batchEntries.map((b) =>
+                  editingBatchId === b.id ? (
+                    <div key={b.id} className="border rounded-lg p-3 space-y-2 bg-gray-50">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-xs">Batch Year</Label>
+                          <Input
+                            value={editingBatchData.batchYear}
+                            onChange={(e) => setEditingBatchData((p) => ({ ...p, batchYear: e.target.value }))}
+                            placeholder="e.g. 2021-2025"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">No. of Students</Label>
+                          <Input
+                            value={editingBatchData.studentCount}
+                            onChange={(e) => setEditingBatchData((p) => ({ ...p, studentCount: e.target.value }))}
+                            placeholder="e.g. 60"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Placements</Label>
+                          <Input
+                            value={editingBatchData.placements}
+                            onChange={(e) => setEditingBatchData((p) => ({ ...p, placements: e.target.value }))}
+                            placeholder="e.g. 45"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Higher Study</Label>
+                          <Input
+                            value={editingBatchData.higherStudy}
+                            onChange={(e) => setEditingBatchData((p) => ({ ...p, higherStudy: e.target.value }))}
+                            placeholder="e.g. 5"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={saveBatchEdit}>Save</Button>
+                        <Button size="sm" variant="outline" onClick={() => setEditingBatchId(null)}>Cancel</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div key={b.id} className="flex items-center justify-between border rounded-lg px-3 py-2 bg-white">
+                      <div className="text-sm">
+                        <span className="font-semibold">{b.batchYear}</span>
+                        <span className="text-gray-400 mx-1">·</span>
+                        <span className="text-gray-600">{b.studentCount} students</span>
+                        <span className="text-gray-400 mx-1">·</span>
+                        <span className="text-gray-600">{b.placements} placed</span>
+                        <span className="text-gray-400 mx-1">·</span>
+                        <span className="text-gray-600">{b.higherStudy} higher study</span>
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingBatchId(b.id);
+                            setEditingBatchData({ batchYear: b.batchYear, studentCount: b.studentCount, placements: b.placements, higherStudy: b.higherStudy });
+                          }}
+                        >
+                          <Edit2 className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => deleteBatchEntry(b.id)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+
+              {/* Add new batch */}
+              <div className="border rounded-lg p-3 space-y-2 bg-gray-50">
+                <p className="text-xs font-medium text-gray-600">Add New Batch</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs">Batch Year</Label>
+                    <Input
+                      value={newBatch.batchYear}
+                      onChange={(e) => setNewBatch((p) => ({ ...p, batchYear: e.target.value }))}
+                      placeholder="e.g. 2022-2026"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">No. of Students</Label>
+                    <Input
+                      value={newBatch.studentCount}
+                      onChange={(e) => setNewBatch((p) => ({ ...p, studentCount: e.target.value }))}
+                      placeholder="e.g. 60"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Placements</Label>
+                    <Input
+                      value={newBatch.placements}
+                      onChange={(e) => setNewBatch((p) => ({ ...p, placements: e.target.value }))}
+                      placeholder="e.g. 45"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Higher Study</Label>
+                    <Input
+                      value={newBatch.higherStudy}
+                      onChange={(e) => setNewBatch((p) => ({ ...p, higherStudy: e.target.value }))}
+                      placeholder="e.g. 5"
+                    />
+                  </div>
+                </div>
+                <Button size="sm" onClick={addBatchEntry} disabled={!newBatch.batchYear.trim()}>
+                  <Plus className="h-3 w-3 mr-1" /> Add Batch
+                </Button>
               </div>
             </div>
 

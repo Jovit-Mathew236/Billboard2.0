@@ -28,6 +28,15 @@ interface Settings {
   higherStudy?: string;
 }
 
+interface BatchEntry {
+  id: string;
+  batchYear: string;
+  studentCount: string;
+  placements: string;
+  higherStudy: string;
+  order?: number;
+}
+
 interface StaffPosition {
   position: string;
   count: string;
@@ -300,35 +309,89 @@ function ImageCarousel({ images }: { images: CarouselImage[] }) {
 
 // ─────────────────── DepartmentHighlights ───────────────────
 function DepartmentHighlights({
-  batchYear,
-  studentCount,
-  placements,
-  higherStudy,
+  batches,
+  fallback,
 }: {
-  batchYear?: string;
-  studentCount?: string;
-  placements?: string;
-  higherStudy?: string;
+  batches: BatchEntry[];
+  fallback: { batchYear?: string; studentCount?: string; placements?: string; higherStudy?: string };
 }) {
+  const entries =
+    batches.length > 0
+      ? batches
+      : [
+          {
+            id: "__fallback__",
+            batchYear: fallback.batchYear ?? "—",
+            studentCount: fallback.studentCount ?? "—",
+            placements: fallback.placements ?? "—",
+            higherStudy: fallback.higherStudy ?? "—",
+          },
+        ];
+
+  const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    if (entries.length <= 1) return;
+    const id = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIdx((i) => (i + 1) % entries.length);
+        setVisible(true);
+      }, 500);
+    }, 8000);
+    return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entries.length]);
+
+  const current = entries[idx] ?? entries[0];
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.1vh", flexShrink: 0 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "1.1vh",
+        flexShrink: 0,
+        opacity: visible ? 1 : 0,
+        transition: "opacity 0.45s ease",
+      }}
+    >
+      {/* Batch indicator dots */}
+      {entries.length > 1 && (
+        <div style={{ display: "flex", justifyContent: "center", gap: "0.6vh" }}>
+          {entries.map((_, i) => (
+            <div
+              key={i}
+              style={{
+                width: i === idx ? "1.8vh" : "0.7vh",
+                height: "0.7vh",
+                borderRadius: "999px",
+                background: i === idx ? "#fff" : "rgba(255,255,255,0.35)",
+                transition: "all 0.4s ease",
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.1vh" }}>
         <div style={{ background: "rgba(20,14,60,0.82)", backdropFilter: "blur(10px)", borderRadius: "1.9vh", padding: "1.4vh 1.9vh", border: "1px solid rgba(255,255,255,0.1)" }}>
           <div style={{ fontSize: "1.3vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.42vh", letterSpacing: "0.04em" }}>Batch</div>
-          <div style={{ fontSize: "3vh", fontWeight: 800, color: "#fff" }}>{batchYear ?? "—"}</div>
+          <div style={{ fontSize: "3vh", fontWeight: 800, color: "#fff" }}>{current.batchYear}</div>
         </div>
         <div style={{ background: "rgba(20,14,60,0.82)", backdropFilter: "blur(10px)", borderRadius: "1.9vh", padding: "1.4vh 1.9vh", border: "1px solid rgba(255,255,255,0.1)" }}>
           <div style={{ fontSize: "1.3vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.42vh", letterSpacing: "0.04em" }}>No of Students</div>
-          <div style={{ fontSize: "3vh", fontWeight: 800, color: "#fff" }}>{studentCount ?? "—"}</div>
+          <div style={{ fontSize: "3vh", fontWeight: 800, color: "#fff" }}>{current.studentCount}</div>
         </div>
       </div>
       <div style={{ background: "#ffffff", borderRadius: "1.9vh", padding: "1.4vh 2.2vh", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Placements</span>
-        <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{placements ?? "—"}</span>
+        <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{current.placements}</span>
       </div>
       <div style={{ background: "#ffffff", borderRadius: "1.9vh", padding: "1.4vh 2.2vh", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Higher Study</span>
-        <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{higherStudy ?? "—"}</span>
+        <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{current.higherStudy}</span>
       </div>
     </div>
   );
@@ -410,6 +473,7 @@ export default function DisplayLayout() {
   const [positions, setPositions] = useState<StaffPosition[]>([]);
   const [faculty, setFaculty] = useState<FacultyMember[]>([]);
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+  const [batches, setBatches] = useState<BatchEntry[]>([]);
 
   const displayTitle =
     settings.title?.trim().toUpperCase() === "ELECTRONICS AND COMPUTER ENGINEERING"
@@ -442,6 +506,23 @@ export default function DisplayLayout() {
   useEffect(() => {
     const unsub = onSnapshot(query(collection(db, "images")), (snap) => {
       setCarouselImages(snap.docs.map((d) => ({ id: d.id, imageUrl: d.data().imageUrl })));
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    const unsub = onSnapshot(query(collection(db, "batches")), (snap) => {
+      const entries = snap.docs
+        .map((d) => ({
+          id: d.id,
+          batchYear: d.data().batchYear ?? "—",
+          studentCount: d.data().studentCount ?? "—",
+          placements: d.data().placements ?? "—",
+          higherStudy: d.data().higherStudy ?? "—",
+          order: d.data().order ?? 0,
+        }))
+        .sort((a, b) => a.order - b.order);
+      setBatches(entries);
     });
     return unsub;
   }, []);
@@ -564,10 +645,13 @@ export default function DisplayLayout() {
           </div>
 
           <DepartmentHighlights
-            batchYear={settings.batchYear}
-            studentCount={settings.studentCount}
-            placements={settings.placements}
-            higherStudy={settings.higherStudy}
+            batches={batches}
+            fallback={{
+              batchYear: settings.batchYear,
+              studentCount: settings.studentCount,
+              placements: settings.placements,
+              higherStudy: settings.higherStudy,
+            }}
           />
         </div>
       </div>
