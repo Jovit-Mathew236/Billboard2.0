@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import localFont from "next/font/local";
 import { Clock3, GraduationCap, Sun } from "lucide-react";
 import {
@@ -37,7 +37,7 @@ interface StaffPosition {
 interface FacultyMember {
   id: string;
   name: string;
-  specializedIn: string; // comma-separated degree tags e.g. "M.E, PhD"
+  specializedIn: string;
 }
 
 interface NewsItem {
@@ -56,10 +56,13 @@ interface CarouselImage {
   imageUrl: string;
 }
 
-// ─────────────────── Helpers ───────────────────
-const GRAD = "linear-gradient(160deg, #3b2fa0 0%, #5b3ec8 35%, #6d3bbd 60%, #4e2a9a 100%)";
-const NEWS_TICKER_HEIGHT = "clamp(110px,14vw,125px)";
+// ─────────────────── Gradient ───────────────────
+const GRAD =
+  "linear-gradient(160deg, #3b2fa0 0%, #5b3ec8 35%, #6d3bbd 60%, #4e2a9a 100%)";
 
+// ─────────────────── WeatherTimePill ───────────────────
+// All sizes in vh: container width = 100vh, so 1vh = 1% of display width.
+// This makes everything scale proportionally at any resolution (4K = 2× 1080p).
 function WeatherTimePill() {
   const [time, setTime] = useState("");
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -78,7 +81,7 @@ function WeatherTimePill() {
     fetch("/api/services/weather")
       .then((r) => r.json())
       .then((d) => setWeather(d?.[0] ?? null))
-      .catch(() => { });
+      .catch(() => {});
   }, []);
 
   const tempC = weather?.Temperature?.Value
@@ -91,80 +94,90 @@ function WeatherTimePill() {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: "18px",
-        background: "rgba(30,24,60,0.75)",
-        backdropFilter: "blur(12px)",
-        borderRadius: "999px",
-        padding: "10px 28px",
-        border: "1px solid rgba(255,255,255,0.15)",
-        fontSize: "clamp(0.9rem, 2vw, 1.3rem)",
+        gap: "1.9vh",
+        background: "rgba(30,24,60,0.72)",
+        backdropFilter: "blur(14px)",
+        borderRadius: 999,
+        padding: "0.93vh 2.6vh",
+        border: "1px solid rgba(255,255,255,0.18)",
+        fontSize: "1.6vh",
         color: "#fff",
         fontWeight: 500,
-        letterSpacing: "0.02em",
+        letterSpacing: "0.01em",
+        whiteSpace: "nowrap",
       }}
     >
-      <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-        <Sun size={18} strokeWidth={2.25} />
+      <span style={{ display: "inline-flex", alignItems: "center", gap: "0.74vh" }}>
+        <Sun style={{ width: "1.7vh", height: "1.7vh" }} strokeWidth={2.25} />
         <span>{condition}{tempC ? ` · ${tempC}°C` : ""}</span>
       </span>
-      <span style={{ opacity: 0.4 }}>|</span>
-      <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-        <Clock3 size={18} strokeWidth={2.25} />
+      <span style={{ opacity: 0.35 }}>|</span>
+      <span style={{ display: "inline-flex", alignItems: "center", gap: "0.74vh" }}>
+        <Clock3 style={{ width: "1.7vh", height: "1.7vh" }} strokeWidth={2.25} />
         <span>{time}</span>
       </span>
     </div>
   );
 }
 
+// ─────────────────── StaffStatCard ───────────────────
 function StaffStatCard({ position, count }: StaffPosition) {
-  const iconMap: Record<string, React.ReactNode> = {
-    "PoP": <GraduationCap size={16} strokeWidth={2.25} />,
-    "Asst Prof": <GraduationCap size={16} strokeWidth={2.25} />,
-    "Asso Prof": <GraduationCap size={16} strokeWidth={2.25} />,
-    "Technical Staff": <GraduationCap size={16} strokeWidth={2.25} />,
-    "Professor": <GraduationCap size={16} strokeWidth={2.25} />,
-    "HOD": <GraduationCap size={16} strokeWidth={2.25} />,
-  };
-  const icon = iconMap[position] ?? <GraduationCap size={16} strokeWidth={2.25} />;
   return (
     <div
       style={{
-        background: "rgba(255,255,255,0.12)",
+        background: "rgba(255,255,255,0.13)",
         backdropFilter: "blur(10px)",
-        borderRadius: "16px",
-        border: "1px solid rgba(255,255,255,0.15)",
-        padding: "clamp(10px,2vw,20px) clamp(12px,2.5vw,28px)",
+        borderRadius: "1.5vh",
+        border: "1px solid rgba(255,255,255,0.16)",
+        padding: "1.3vh 1.7vh",
         display: "flex",
         flexDirection: "column",
-        gap: "6px",
+        gap: "0.55vh",
         flex: 1,
         minWidth: 0,
       }}
     >
-      <div style={{ fontSize: "clamp(0.7rem,1.8vw,1rem)", color: "rgba(255,255,255,0.65)", display: "flex", alignItems: "center", gap: "6px" }}>
-        <span style={{ display: "inline-flex", alignItems: "center" }}>{icon}</span>
+      <div
+        style={{
+          fontSize: "1.2vh",
+          color: "rgba(255,255,255,0.6)",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.55vh",
+          whiteSpace: "nowrap",
+        }}
+      >
+        <GraduationCap style={{ width: "1.3vh", height: "1.3vh" }} strokeWidth={2.25} />
         <span>{position}</span>
       </div>
-      <div style={{ fontSize: "clamp(2rem,5vw,3.5rem)", fontWeight: 800, color: "#fff", lineHeight: 1 }}>
+      <div
+        style={{
+          fontSize: "3.9vh",
+          fontWeight: 800,
+          color: "#fff",
+          lineHeight: 1,
+        }}
+      >
         {count}
       </div>
     </div>
   );
 }
 
+// ─────────────────── DegreeBadge ───────────────────
 function DegreeBadge({ label }: { label: string }) {
   return (
     <span
       style={{
         display: "inline-block",
         background: "rgba(90,60,200,0.12)",
-        border: "1px solid rgba(90,60,200,0.3)",
-        borderRadius: "6px",
-        padding: "2px 10px",
-        fontSize: "clamp(0.55rem,1.3vw,0.85rem)",
+        border: "1px solid rgba(90,60,200,0.28)",
+        borderRadius: "0.55vh",
+        padding: "0.19vh 0.83vh",
+        fontSize: "1vh",
         color: "#4a3aaa",
         fontWeight: 600,
-        lineHeight: 1.4,
+        lineHeight: 1.5,
         whiteSpace: "nowrap",
       }}
     >
@@ -173,6 +186,7 @@ function DegreeBadge({ label }: { label: string }) {
   );
 }
 
+// ─────────────────── FacultyCard ───────────────────
 function FacultyCard({ members }: { members: FacultyMember[] }) {
   const PAGE_SIZE = 9;
   const [page, setPage] = useState(0);
@@ -197,14 +211,15 @@ function FacultyCard({ members }: { members: FacultyMember[] }) {
     <div
       style={{
         background: "#fff",
-        borderRadius: "20px",
-        padding: "clamp(14px,3vw,28px)",
+        borderRadius: "1.85vh",
+        padding: "1.85vh 2vh",
         display: "flex",
         flexDirection: "column",
-        gap: "clamp(8px,1.5vw,14px)",
-        flex: 1,
+        gap: "0.93vh",
+        width: "100%",
         height: "100%",
         overflow: "hidden",
+        boxSizing: "border-box",
         opacity: fading ? 0 : 1,
         transition: "opacity 0.4s ease",
       }}
@@ -212,10 +227,10 @@ function FacultyCard({ members }: { members: FacultyMember[] }) {
       {slice.map((m) => {
         const degrees = (m.specializedIn ?? "").split(",").filter(Boolean);
         return (
-          <div key={m.id} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          <div key={m.id} style={{ display: "flex", flexDirection: "column", gap: "0.37vh" }}>
             <div
               style={{
-                fontSize: "clamp(0.8rem,2.2vw,1.2rem)",
+                fontSize: "1.56vh",
                 fontWeight: 700,
                 color: "#2d1fa3",
                 lineHeight: 1.2,
@@ -223,7 +238,7 @@ function FacultyCard({ members }: { members: FacultyMember[] }) {
             >
               {m.name}
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.37vh" }}>
               {degrees.map((d, i) => (
                 <DegreeBadge key={i} label={d} />
               ))}
@@ -235,6 +250,179 @@ function FacultyCard({ members }: { members: FacultyMember[] }) {
   );
 }
 
+// ─────────────────── ImageCarousel ───────────────────
+function ImageCarousel({ images }: { images: CarouselImage[] }) {
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    if (images.length < 2) return;
+    const id = setInterval(() => setIdx((i) => (i + 1) % images.length), 5000);
+    return () => clearInterval(id);
+  }, [images.length]);
+
+  if (images.length === 0) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          background: "rgba(255,255,255,0.1)",
+          borderRadius: "1.85vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "rgba(255,255,255,0.35)",
+          fontSize: "1.4vh",
+        }}
+      >
+        No image
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        borderRadius: "1.85vh",
+        overflow: "hidden",
+        background: "#e8e8ee",
+      }}
+    >
+      {images.map((img, i) => (
+        <img
+          key={img.id}
+          src={img.imageUrl}
+          alt={`photo-${i}`}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            objectPosition: "center center",
+            opacity: i === idx ? 1 : 0,
+            transition: "opacity 1s ease",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─────────────────── DepartmentHighlights ───────────────────
+function DepartmentHighlights({
+  batchYear,
+  studentCount,
+  placements,
+  higherStudy,
+}: {
+  batchYear?: string;
+  studentCount?: string;
+  placements?: string;
+  higherStudy?: string;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.74vh",
+        flexShrink: 0,
+      }}
+    >
+      {/* Batch + No of Students — side by side dark tiles */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.74vh" }}>
+        <div
+          style={{
+            background: "rgba(20,14,60,0.82)",
+            backdropFilter: "blur(10px)",
+            borderRadius: "1.3vh",
+            padding: "0.93vh 1.3vh",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <div style={{ fontSize: "0.89vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.28vh", letterSpacing: "0.04em" }}>
+            Batch
+          </div>
+          <div style={{ fontSize: "2vh", fontWeight: 800, color: "#fff" }}>
+            {batchYear ?? "—"}
+          </div>
+        </div>
+        <div
+          style={{
+            background: "rgba(20,14,60,0.82)",
+            backdropFilter: "blur(10px)",
+            borderRadius: "1.3vh",
+            padding: "0.93vh 1.3vh",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <div style={{ fontSize: "0.89vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.28vh", letterSpacing: "0.04em" }}>
+            No of Students
+          </div>
+          <div style={{ fontSize: "2vh", fontWeight: 800, color: "#fff" }}>
+            {studentCount ?? "—"}
+          </div>
+        </div>
+      </div>
+
+      {/* Placements — white tile */}
+      <div
+        style={{
+          background: "#ffffff",
+          borderRadius: "1.3vh",
+          padding: "0.93vh 1.48vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ fontSize: "1.56vh", fontWeight: 600, color: "#1a1a2e" }}>Placements</span>
+        <span
+          style={{
+            fontSize: "2.2vh",
+            fontWeight: 900,
+            color: "#1a1a2e",
+            borderLeft: "0.28vh solid #1a1a2e",
+            paddingLeft: "1.3vh",
+          }}
+        >
+          {placements ?? "—"}
+        </span>
+      </div>
+
+      {/* Higher Study — white tile */}
+      <div
+        style={{
+          background: "#ffffff",
+          borderRadius: "1.3vh",
+          padding: "0.93vh 1.48vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ fontSize: "1.56vh", fontWeight: 600, color: "#1a1a2e" }}>Higher Study</span>
+        <span
+          style={{
+            fontSize: "2.2vh",
+            fontWeight: 900,
+            color: "#1a1a2e",
+            borderLeft: "0.28vh solid #1a1a2e",
+            paddingLeft: "1.3vh",
+          }}
+        >
+          {higherStudy ?? "—"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────── NewsTicker ───────────────────
 function NewsTickerBottom() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [idx, setIdx] = useState(0);
@@ -245,7 +433,7 @@ function NewsTickerBottom() {
       fetch("/api/services/news")
         .then((r) => r.json())
         .then((d) => setNews(d?.data ?? []))
-        .catch(() => { });
+        .catch(() => {});
     load();
     const id = setInterval(load, 300000);
     return () => clearInterval(id);
@@ -268,176 +456,27 @@ function NewsTickerBottom() {
   return (
     <div
       style={{
+        width: "100%",
         height: "100%",
-        background: "rgba(20,16,50,0.82)",
-        backdropFilter: "blur(12px)",
-        borderRadius: "16px",
-        padding: "clamp(10px,2vw,18px) clamp(16px,3vw,32px)",
+        background: "rgba(18,14,48,0.85)",
+        backdropFilter: "blur(14px)",
+        borderRadius: "1.5vh",
+        padding: "0 2.6vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         color: "#fff",
-        fontSize: "clamp(0.8rem,2vw,1.15rem)",
+        fontSize: "1.5vh",
         fontWeight: 500,
         textAlign: "center",
-        lineHeight: 1.5,
+        lineHeight: 1.55,
         opacity: visible ? 1 : 0,
         transition: "opacity 0.7s ease",
         border: "1px solid rgba(255,255,255,0.1)",
+        boxSizing: "border-box",
       }}
     >
       {headline}
-    </div>
-  );
-}
-
-function ImageCarousel({ images }: { images: CarouselImage[] }) {
-  const [idx, setIdx] = useState(0);
-
-  useEffect(() => {
-    if (images.length < 2) return;
-    const id = setInterval(() => setIdx((i) => (i + 1) % images.length), 5000);
-    return () => clearInterval(id);
-  }, [images.length]);
-
-  if (images.length === 0) {
-    return (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          background: "rgba(255,255,255,0.1)",
-          borderRadius: "20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "rgba(255,255,255,0.4)",
-          fontSize: "1rem",
-        }}
-      >
-        No image
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
-        height: "100%",
-        width: "auto",
-        maxWidth: "100%",
-        aspectRatio: "3 / 4",
-        position: "relative",
-        borderRadius: "20px",
-        overflow: "hidden",
-        background: "#ffffff",
-      }}
-    >
-      {images.map((img, i) => (
-        <img
-          key={img.id}
-          src={img.imageUrl}
-          alt={`photo-${i}`}
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            display: "block",
-            opacity: i === idx ? 1 : 0,
-            transition: "opacity 1s ease",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function DepartmentHighlights({
-  batchYear,
-  studentCount,
-  placements,
-  higherStudy,
-}: {
-  batchYear?: string;
-  studentCount?: string;
-  placements?: string;
-  higherStudy?: string;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "clamp(6px,1vw,10px)",
-      }}
-    >
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "clamp(6px,1vw,10px)",
-        }}
-      >
-        <div
-          style={{
-            background: "rgba(30,20,80,0.75)",
-            backdropFilter: "blur(10px)",
-            borderRadius: "14px",
-            padding: "clamp(8px,1.5vw,14px) clamp(10px,2vw,18px)",
-            border: "1px solid rgba(255,255,255,0.1)",
-          }}
-        >
-          <div style={{ fontSize: "clamp(0.55rem,1.2vw,0.8rem)", color: "rgba(255,255,255,0.55)", marginBottom: "2px" }}>Batch</div>
-          <div style={{ fontSize: "clamp(1rem,3vw,2rem)", fontWeight: 800, color: "#fff" }}>{batchYear ?? "—"}</div>
-        </div>
-
-        <div
-          style={{
-            background: "rgba(30,20,80,0.75)",
-            backdropFilter: "blur(10px)",
-            borderRadius: "14px",
-            padding: "clamp(8px,1.5vw,14px) clamp(10px,2vw,18px)",
-            border: "1px solid rgba(255,255,255,0.1)",
-          }}
-        >
-          <div style={{ fontSize: "clamp(0.55rem,1.2vw,0.8rem)", color: "rgba(255,255,255,0.55)", marginBottom: "2px" }}>No of Students</div>
-          <div style={{ fontSize: "clamp(1rem,3vw,2rem)", fontWeight: 800, color: "#fff" }}>{studentCount ?? "—"}</div>
-        </div>
-      </div>
-
-      <div
-        style={{
-          background: "#ffffff",
-          borderRadius: "14px",
-          padding: "clamp(8px,1.5vw,14px) clamp(12px,2vw,22px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <span style={{ fontSize: "clamp(0.85rem,2.2vw,1.4rem)", fontWeight: 600, color: "#1a1a2e" }}>Placements</span>
-        <span style={{ fontSize: "clamp(1.2rem,3.5vw,2.2rem)", fontWeight: 900, color: "#1a1a2e", borderLeft: "3px solid #1a1a2e", paddingLeft: "14px" }}>
-          {placements ?? "—"}
-        </span>
-      </div>
-
-      <div
-        style={{
-          background: "#ffffff",
-          borderRadius: "14px",
-          padding: "clamp(8px,1.5vw,14px) clamp(12px,2vw,22px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <span style={{ fontSize: "clamp(0.85rem,2.2vw,1.4rem)", fontWeight: 600, color: "#1a1a2e" }}>Higher Study</span>
-        <span style={{ fontSize: "clamp(1.2rem,3.5vw,2.2rem)", fontWeight: 900, color: "#1a1a2e", borderLeft: "3px solid #1a1a2e", paddingLeft: "14px" }}>
-          {higherStudy ?? "—"}
-        </span>
-      </div>
     </div>
   );
 }
@@ -447,7 +486,7 @@ export default function DisplayLayout() {
   const [settings, setSettings] = useState<Settings>({
     backgroundColor: "#3b2fa0",
     headerText: "Department of",
-    title: "Electronics and Computer Engineering",
+    title: "Electronics & Computer Engineering",
     backgroundImageUrl: "",
     logoText: "er",
     batchYear: "2021-2025",
@@ -462,10 +501,9 @@ export default function DisplayLayout() {
 
   const displayTitle =
     settings.title?.trim().toUpperCase() === "ELECTRONICS AND COMPUTER ENGINEERING"
-      ? "Electronics and Computer Engineering"
+      ? "Electronics & Computer Engineering"
       : settings.title;
 
-  // Settings
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "settings", "global"), (snap) => {
       if (snap.exists()) setSettings((prev) => ({ ...prev, ...(snap.data() as Settings) }));
@@ -473,182 +511,143 @@ export default function DisplayLayout() {
     return unsub;
   }, []);
 
-  // Staff positions
   useEffect(() => {
     const unsub = onSnapshot(query(collection(db, "position")), (snap) => {
-      setPositions(
-        snap.docs.map((d) => ({
-          position: d.data().position,
-          count: d.data().count,
-        }))
-      );
+      setPositions(snap.docs.map((d) => ({ position: d.data().position, count: d.data().count })));
     });
     return unsub;
   }, []);
 
-  // Faculty
   useEffect(() => {
     const unsub = onSnapshot(query(collection(db, "fields")), (snap) => {
       setFaculty(
-        snap.docs.map((d) => ({
-          id: d.id,
-          name: d.data().name,
-          specializedIn: d.data().specializedIn ?? "",
-        }))
+        snap.docs.map((d) => ({ id: d.id, name: d.data().name, specializedIn: d.data().specializedIn ?? "" }))
       );
     });
     return unsub;
   }, []);
 
-  // Carousel images
   useEffect(() => {
     const unsub = onSnapshot(query(collection(db, "images")), (snap) => {
-      setCarouselImages(
-        snap.docs.map((d) => ({ id: d.id, imageUrl: d.data().imageUrl }))
-      );
+      setCarouselImages(snap.docs.map((d) => ({ id: d.id, imageUrl: d.data().imageUrl })));
     });
     return unsub;
   }, []);
 
   return (
     <div
-      className={`${geistSans.className} display-layout`}
+      className={geistSans.className}
       style={{
+        /* Rotated billboard: landscape screen displayed as portrait.
+           width:100vh = screen height = display width after rotation.
+           All vh units inside scale proportionally at any resolution. */
         position: "fixed",
-        top: 0,
-        left: 0,
+        top: 0, left: 0, right: 0, bottom: 0,
+        margin: "auto",
         width: "100vh",
         height: "100vw",
         transform: "rotate(270deg)",
         transformOrigin: "center center",
-        margin: "auto",
-        right: 0,
-        bottom: 0,
         background: settings.backgroundImageUrl
           ? `url(${settings.backgroundImageUrl}) center/cover no-repeat`
           : GRAD,
         overflow: "hidden",
+        boxSizing: "border-box",
+        letterSpacing: "-0.03em",
         display: "flex",
         flexDirection: "column",
-        padding: "clamp(12px,2.5vw,28px)",
-        gap: "clamp(8px,1.5vw,16px)",
-        letterSpacing: "-0.04em",
-        fontKerning: "normal",
-        boxSizing: "border-box",
+        padding: "1.9vh",
+        gap: "1.1vh",
       }}
     >
-      {/* Dark overlay when bg image active */}
       {settings.backgroundImageUrl && (
-        <div style={{ position: "absolute", inset: 0, background: "rgba(30,15,80,0.6)", zIndex: 0 }} />
+        <div style={{ position: "absolute", inset: 0, background: "rgba(28,14,72,0.58)", zIndex: 0 }} />
       )}
 
-      {/* ── Row 1: Top bar ── */}
+      {/* ── Row 1: Weather / Time pill ── */}
       <div style={{ display: "flex", justifyContent: "center", position: "relative", zIndex: 1, flexShrink: 0 }}>
         <WeatherTimePill />
       </div>
 
-      {/* ── Row 2: Department Header ── */}
+      {/* ── Row 2: Logo + Department name ── */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "clamp(12px,2vw,24px)",
+          gap: "1.9vh",
           position: "relative",
           zIndex: 1,
           flexShrink: 0,
         }}
       >
-        {/* Logo */}
         <div
           style={{
-            fontSize: "clamp(2rem,6vw,4.5rem)",
+            fontSize: "5.6vh",
             fontWeight: 900,
             color: "#fff",
             lineHeight: 1,
-            letterSpacing: "-0.04em",
+            letterSpacing: "-0.05em",
             flexShrink: 0,
           }}
         >
           {settings.logoText ?? "er"}
         </div>
-        {/* Divider */}
+
         <div
           style={{
-            width: "3px",
-            height: "clamp(40px,8vw,80px)",
-            background: "rgba(255,255,255,0.5)",
-            borderRadius: "2px",
+            width: "0.28vh",
+            height: "6.5vh",
+            background: "rgba(255,255,255,0.45)",
+            borderRadius: "0.19vh",
             flexShrink: 0,
           }}
         />
-        {/* Text */}
-        <div>
-          <div style={{ fontSize: "clamp(0.75rem,2vw,1.2rem)", color: "rgba(255,255,255,0.8)", fontWeight: 500, marginBottom: "2px" }}>
+
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: "1.48vh", color: "rgba(255,255,255,0.75)", fontWeight: 500, marginBottom: "0.19vh" }}>
             {settings.headerText}
           </div>
-          <div
-            style={{
-              fontSize: "clamp(1.1rem,3.5vw,2.5rem)",
-              fontWeight: 400,
-              color: "#fff",
-              lineHeight: 1.15,
-              letterSpacing: "-0.01em",
-            }}
-          >
+          <div style={{ fontSize: "2.8vh", fontWeight: 400, color: "#fff", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
             {displayTitle}
           </div>
         </div>
       </div>
 
-      {/* ── Row 3: Staff Stats ── */}
-      <div
-        style={{
-          display: "flex",
-          gap: "clamp(8px,1.5vw,14px)",
-          position: "relative",
-          zIndex: 1,
-          flexShrink: 0,
-        }}
-      >
+      {/* ── Row 3: Staff stat cards ── */}
+      <div style={{ display: "flex", gap: "0.93vh", position: "relative", zIndex: 1, flexShrink: 0 }}>
         {positions.length > 0
           ? positions.map((p, i) => <StaffStatCard key={i} {...p} />)
           : ["PoP", "Asst Prof", "Asso Prof", "Technical Staff"].map((p) => (
-            <StaffStatCard key={p} position={p} count="—" />
-          ))}
+              <StaffStatCard key={p} position={p} count="—" />
+            ))}
       </div>
 
-      {/* ── Row 4: Main Content ── */}
+      {/* ── Row 4: Faculty list (left) + Carousel + Stats (right column) ── */}
       <div
         style={{
           display: "flex",
-          gap: "clamp(8px,1.5vw,14px)",
-          alignItems: "stretch",
-          flex: 1,
-          minHeight: 0,
+          gap: "1.1vh",
+          flexShrink: 0,
           position: "relative",
           zIndex: 1,
+          alignItems: "stretch",
         }}
       >
-        {/* Left: Faculty list */}
-        <div style={{ flex: "0 0 42%", minWidth: 0, minHeight: 0, height: "100%", display: "flex", alignSelf: "stretch" }}>
+        <div style={{ flex: "0 0 48%", minWidth: 0, minHeight: 0 }}>
           <FacultyCard members={faculty} />
         </div>
 
-        {/* Right: Photo + stats */}
         <div
           style={{
             flex: 1,
-            height: "100%",
+            minWidth: 0,
             display: "flex",
             flexDirection: "column",
-            gap: "clamp(2px,0.4vw,6px)",
-            minWidth: 0,
-            minHeight: 0,
-            alignSelf: "stretch",
+            gap: "1.1vh",
+            overflow: "hidden",
           }}
         >
-          {/* Photo */}
-          <div style={{ flex: 1, minHeight: 0, display: "flex", alignItems: "flex-start", justifyContent: "center" }}>
+          <div style={{ width: "100%", aspectRatio: "3 / 4", flexShrink: 0 }}>
             <ImageCarousel images={carouselImages} />
           </div>
 
@@ -661,8 +660,8 @@ export default function DisplayLayout() {
         </div>
       </div>
 
-      {/* ── Row 5: News Ticker ── */}
-      <div style={{ position: "relative", zIndex: 0, flexShrink: 0, height: NEWS_TICKER_HEIGHT }}>
+      {/* ── Row 5: News ticker ── */}
+      <div style={{ height: "7vw", flexShrink: 0, position: "relative", zIndex: 1 }}>
         <NewsTickerBottom />
       </div>
     </div>
