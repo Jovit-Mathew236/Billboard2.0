@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode, type CSSProperties } from "react";
 import localFont from "next/font/local";
 import { Clock3, GraduationCap, Sun } from "lucide-react";
 import {
@@ -9,6 +9,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { findBatchTable, parseBatchTable, TableBlockLike } from "@/lib/utils/batches";
 
 const geistSans = localFont({
   src: "../../app/fonts/GeistVF.woff",
@@ -34,7 +35,7 @@ interface BatchEntry {
   studentCount: string;
   placements: string;
   higherStudy: string;
-  order?: number;
+  row?: string[];
 }
 
 interface StaffPosition {
@@ -188,26 +189,55 @@ function DegreeBadge({ label }: { label: string }) {
   );
 }
 
+// ─────────────────── CrossFade ───────────────────
+// Stacks every slide in one grid cell so the container keeps the tallest
+// slide's size. The active slide fades in while the previous one fades out
+// at the same time — a true dissolve that never shows an empty frame.
+function CrossFade({
+  index,
+  slides,
+  duration = 1000,
+  style,
+}: {
+  index: number;
+  slides: ReactNode[];
+  duration?: number;
+  style?: CSSProperties;
+}) {
+  return (
+    <div style={{ display: "grid", ...style }}>
+      {slides.map((slide, i) => (
+        <div
+          key={i}
+          style={{
+            gridArea: "1 / 1 / 2 / 2",
+            opacity: i === index ? 1 : 0,
+            transition: `opacity ${duration}ms ease-in-out`,
+            pointerEvents: i === index ? "auto" : "none",
+          }}
+        >
+          {slide}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─────────────────── FacultyCard ───────────────────
 function FacultyCard({ members }: { members: FacultyMember[] }) {
   const PAGE_SIZE = 9;
   const [page, setPage] = useState(0);
-  const [fading, setFading] = useState(false);
-  const totalPages = Math.ceil(members.length / PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(members.length / PAGE_SIZE));
 
   useEffect(() => {
     if (totalPages <= 1) return;
-    const id = setInterval(() => {
-      setFading(true);
-      setTimeout(() => {
-        setPage((p) => (p + 1) % totalPages);
-        setFading(false);
-      }, 500);
-    }, 8000);
+    const id = setInterval(() => setPage((p) => (p + 1) % totalPages), 8000);
     return () => clearInterval(id);
   }, [totalPages]);
 
-  const slice = members.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+  const pages = Array.from({ length: totalPages }, (_, p) =>
+    members.slice(p * PAGE_SIZE, p * PAGE_SIZE + PAGE_SIZE)
+  );
 
   return (
     <div
@@ -215,32 +245,35 @@ function FacultyCard({ members }: { members: FacultyMember[] }) {
         background: "#fff",
         borderRadius: "2.75vh",
         padding: "2.75vh 3vh",
-        display: "flex",
-        flexDirection: "column",
-        gap: "1.4vh",
         width: "100%",
         height: "100%",
         overflow: "hidden",
         boxSizing: "border-box",
-        opacity: fading ? 0 : 1,
-        transition: "opacity 0.4s ease",
       }}
     >
-      {slice.map((m) => {
-        const degrees = (m.specializedIn ?? "").split(",").filter(Boolean);
-        return (
-          <div key={m.id} style={{ display: "flex", flexDirection: "column", gap: "0.55vh" }}>
-            <div style={{ fontSize: "2.35vh", fontWeight: 700, color: "#2d1fa3", lineHeight: 1.2 }}>
-              {m.name}
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.55vh" }}>
-              {degrees.map((d, i) => (
-                <DegreeBadge key={i} label={d} />
-              ))}
-            </div>
+      <CrossFade
+        index={page % totalPages}
+        style={{ width: "100%", height: "100%" }}
+        slides={pages.map((slice, p) => (
+          <div key={p} style={{ display: "flex", flexDirection: "column", gap: "1.4vh", height: "100%" }}>
+            {slice.map((m) => {
+              const degrees = (m.specializedIn ?? "").split(",").filter(Boolean);
+              return (
+                <div key={m.id} style={{ display: "flex", flexDirection: "column", gap: "0.55vh" }}>
+                  <div style={{ fontSize: "2.35vh", fontWeight: 700, color: "#2d1fa3", lineHeight: 1.2 }}>
+                    {m.name}
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.55vh" }}>
+                    {degrees.map((d, i) => (
+                      <DegreeBadge key={i} label={d} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
+        ))}
+      />
     </div>
   );
 }
@@ -329,22 +362,15 @@ function DepartmentHighlights({
         ];
 
   const [idx, setIdx] = useState(0);
-  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     if (entries.length <= 1) return;
-    const id = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setIdx((i) => (i + 1) % entries.length);
-        setVisible(true);
-      }, 500);
-    }, 8000);
+    const id = setInterval(() => setIdx((i) => (i + 1) % entries.length), 8000);
     return () => clearInterval(id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entries.length]);
 
-  const current = entries[idx] ?? entries[0];
+  const safeIdx = idx % entries.length;
 
   return (
     <div
@@ -353,8 +379,6 @@ function DepartmentHighlights({
         flexDirection: "column",
         gap: "1.1vh",
         flexShrink: 0,
-        opacity: visible ? 1 : 0,
-        transition: "opacity 0.45s ease",
       }}
     >
       {/* Batch indicator dots */}
@@ -364,10 +388,10 @@ function DepartmentHighlights({
             <div
               key={i}
               style={{
-                width: i === idx ? "1.8vh" : "0.7vh",
+                width: i === safeIdx ? "1.8vh" : "0.7vh",
                 height: "0.7vh",
                 borderRadius: "999px",
-                background: i === idx ? "#fff" : "rgba(255,255,255,0.35)",
+                background: i === safeIdx ? "#fff" : "rgba(255,255,255,0.35)",
                 transition: "all 0.4s ease",
               }}
             />
@@ -375,24 +399,31 @@ function DepartmentHighlights({
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.1vh" }}>
-        <div style={{ background: "rgba(20,14,60,0.82)", backdropFilter: "blur(10px)", borderRadius: "1.9vh", padding: "1.4vh 1.9vh", border: "1px solid rgba(255,255,255,0.1)" }}>
-          <div style={{ fontSize: "1.3vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.42vh", letterSpacing: "0.04em" }}>Batch</div>
-          <div style={{ fontSize: "3vh", fontWeight: 800, color: "#fff" }}>{current.batchYear}</div>
-        </div>
-        <div style={{ background: "rgba(20,14,60,0.82)", backdropFilter: "blur(10px)", borderRadius: "1.9vh", padding: "1.4vh 1.9vh", border: "1px solid rgba(255,255,255,0.1)" }}>
-          <div style={{ fontSize: "1.3vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.42vh", letterSpacing: "0.04em" }}>No of Students</div>
-          <div style={{ fontSize: "3vh", fontWeight: 800, color: "#fff" }}>{current.studentCount}</div>
-        </div>
-      </div>
-      <div style={{ background: "#ffffff", borderRadius: "1.9vh", padding: "1.4vh 2.2vh", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Placements</span>
-        <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{current.placements}</span>
-      </div>
-      <div style={{ background: "#ffffff", borderRadius: "1.9vh", padding: "1.4vh 2.2vh", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Higher Study</span>
-        <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{current.higherStudy}</span>
-      </div>
+      <CrossFade
+        index={safeIdx}
+        slides={entries.map((current, e) => (
+          <div key={e} style={{ display: "flex", flexDirection: "column", gap: "1.1vh" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.1vh" }}>
+              <div style={{ background: "rgba(20,14,60,0.82)", backdropFilter: "blur(10px)", borderRadius: "1.9vh", padding: "1.4vh 1.9vh", border: "1px solid rgba(255,255,255,0.1)" }}>
+                <div style={{ fontSize: "1.3vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.42vh", letterSpacing: "0.04em" }}>Batch</div>
+                <div style={{ fontSize: "3vh", fontWeight: 800, color: "#fff" }}>{current.batchYear}</div>
+              </div>
+              <div style={{ background: "rgba(20,14,60,0.82)", backdropFilter: "blur(10px)", borderRadius: "1.9vh", padding: "1.4vh 1.9vh", border: "1px solid rgba(255,255,255,0.1)" }}>
+                <div style={{ fontSize: "1.3vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.42vh", letterSpacing: "0.04em" }}>No of Students</div>
+                <div style={{ fontSize: "3vh", fontWeight: 800, color: "#fff" }}>{current.studentCount}</div>
+              </div>
+            </div>
+            <div style={{ background: "#ffffff", borderRadius: "1.9vh", padding: "1.4vh 2.2vh", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Placements</span>
+              <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{current.placements || "00"}</span>
+            </div>
+            <div style={{ background: "#ffffff", borderRadius: "1.9vh", padding: "1.4vh 2.2vh", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Higher Study</span>
+              <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{current.higherStudy || "00"}</span>
+            </div>
+          </div>
+        ))}
+      />
     </div>
   );
 }
@@ -401,7 +432,6 @@ function DepartmentHighlights({
 function NewsTickerBottom() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [idx, setIdx] = useState(0);
-  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const load = () =>
@@ -416,17 +446,18 @@ function NewsTickerBottom() {
 
   useEffect(() => {
     if (news.length === 0) return;
-    const id = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setIdx((i) => (i + 1) % Math.min(news.length, 10));
-        setVisible(true);
-      }, 800);
-    }, 7000);
+    const id = setInterval(
+      () => setIdx((i) => (i + 1) % Math.min(news.length, 10)),
+      7000
+    );
     return () => clearInterval(id);
   }, [news.length]);
 
-  const headline = news[idx]?.title ?? "Loading latest news…";
+  const headlines =
+    news.length > 0
+      ? news.slice(0, 10).map((n) => n.title)
+      : ["Loading latest news…"];
+  const safeIdx = idx % headlines.length;
 
   return (
     <div
@@ -437,21 +468,34 @@ function NewsTickerBottom() {
         backdropFilter: "blur(14px)",
         borderRadius: "2.2vh",
         padding: "0 3.9vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "#fff",
-        fontSize: "2.2vh",
-        fontWeight: 500,
-        textAlign: "center",
-        lineHeight: 1.55,
-        opacity: visible ? 1 : 0,
-        transition: "opacity 0.7s ease",
         border: "1px solid rgba(255,255,255,0.1)",
         boxSizing: "border-box",
       }}
     >
-      {headline}
+      <CrossFade
+        index={safeIdx}
+        duration={800}
+        style={{ width: "100%", height: "100%" }}
+        slides={headlines.map((headline, h) => (
+          <div
+            key={h}
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#fff",
+              fontSize: "2.2vh",
+              fontWeight: 500,
+              textAlign: "center",
+              lineHeight: 1.55,
+            }}
+          >
+            {headline}
+          </div>
+        ))}
+      />
     </div>
   );
 }
@@ -511,18 +555,10 @@ export default function DisplayLayout() {
   }, []);
 
   useEffect(() => {
-    const unsub = onSnapshot(query(collection(db, "batches")), (snap) => {
-      const entries = snap.docs
-        .map((d) => ({
-          id: d.id,
-          batchYear: d.data().batchYear ?? "—",
-          studentCount: d.data().studentCount ?? "—",
-          placements: d.data().placements ?? "—",
-          higherStudy: d.data().higherStudy ?? "—",
-          order: d.data().order ?? 0,
-        }))
-        .sort((a, b) => a.order - b.order);
-      setBatches(entries);
+    const unsub = onSnapshot(query(collection(db, "blocks")), (snap) => {
+      const blocks = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as TableBlockLike[];
+      const table = findBatchTable(blocks);
+      setBatches(table ? parseBatchTable(table) : []);
     });
     return unsub;
   }, []);

@@ -1,6 +1,6 @@
 "use client";
 import SwipeButton from "@/components/swipe-button";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, GripVertical, X, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,9 +29,15 @@ import {
   onSnapshot,
   query,
   orderBy,
-  updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import {
+  findBatchTable,
+  parseBatchTable,
+  serializeBatchRows,
+  DEFAULT_BATCH_HEADERS,
+  TableBlockLike,
+} from "@/lib/utils/batches";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import WeatherWidget from "@/components/weather-widget";
@@ -148,7 +154,7 @@ interface BatchEntry {
   studentCount: string;
   placements: string;
   higherStudy: string;
-  order: number;
+  row?: string[];
 }
 
 // Move renderBlockPreview before SortableBlock
@@ -340,11 +346,10 @@ const EditDashboard = () => {
     backgroundS3Key: "",
   });
 
-  // ── Batch management state ──
-  const [batchEntries, setBatchEntries] = useState<BatchEntry[]>([]);
+  // ── Batch management state (backed by the "Students Count" table block) ──
   const [newBatch, setNewBatch] = useState({ batchYear: "", studentCount: "", placements: "", higherStudy: "" });
   const [editingBatchId, setEditingBatchId] = useState<string | null>(null);
-  const [editingBatchData, setEditingBatchData] = useState<Omit<BatchEntry, "id" | "order">>({ batchYear: "", studentCount: "", placements: "", higherStudy: "" });
+  const [editingBatchData, setEditingBatchData] = useState<Omit<BatchEntry, "id" | "row">>({ batchYear: "", studentCount: "", placements: "", higherStudy: "" });
 
   // --- Input string states for dimension fields ---
   const [widthInputValue, setWidthInputValue] = useState("");
@@ -400,53 +405,65 @@ const EditDashboard = () => {
     return () => unsubscribe();
   }, []);
 
-  // Load batches
-  useEffect(() => {
-    const unsub = onSnapshot(query(collection(db, "batches")), (snap) => {
-      const entries = snap.docs
-        .map((d) => ({
-          id: d.id,
-          batchYear: d.data().batchYear ?? "",
-          studentCount: d.data().studentCount ?? "",
-          placements: d.data().placements ?? "",
-          higherStudy: d.data().higherStudy ?? "",
-          order: d.data().order ?? 0,
-        }))
-        .sort((a, b) => a.order - b.order);
-      setBatchEntries(entries);
-    });
-    return () => unsub();
-  }, []);
+  // ── Batches are derived from the "Students Count" table block in `blocks` ──
+  const batchTable = useMemo(
+    () => findBatchTable(blocks as unknown as TableBlockLike[]),
+    [blocks]
+  );
+  const batchEntries = useMemo(
+    () => (batchTable ? parseBatchTable(batchTable) : []),
+    [batchTable]
+  );
+
+  const persistBatches = async (entries: Array<Omit<BatchEntry, "id">>) => {
+    try {
+      if (batchTable) {
+        const headers = batchTable.headers ?? DEFAULT_BATCH_HEADERS;
+        await setDoc(
+          doc(db, "blocks", batchTable.id),
+          { rows: serializeBatchRows(headers, entries) },
+          { merge: true }
+        );
+      } else {
+        const maxPosition = blocks.reduce(
+          (max, block) => Math.max(max, block.position ?? -1),
+          -1
+        );
+        await addDoc(collection(db, "blocks"), {
+          type: "table",
+          title: "Students Count",
+          headers: DEFAULT_BATCH_HEADERS,
+          rows: serializeBatchRows(DEFAULT_BATCH_HEADERS, entries),
+          width: 12,
+          height: 100,
+          theme: "light",
+          backgroundColor: "#ffffff",
+          textColor: "#000000",
+          position: maxPosition + 1,
+        });
+      }
+    } catch (e) {
+      console.error("Error saving batches:", e);
+    }
+  };
 
   const addBatchEntry = async () => {
     if (!newBatch.batchYear.trim()) return;
-    try {
-      await addDoc(collection(db, "batches"), {
-        ...newBatch,
-        order: batchEntries.length,
-      });
-      setNewBatch({ batchYear: "", studentCount: "", placements: "", higherStudy: "" });
-    } catch (e) {
-      console.error("Error adding batch:", e);
-    }
+    await persistBatches([...batchEntries, newBatch]);
+    setNewBatch({ batchYear: "", studentCount: "", placements: "", higherStudy: "" });
   };
 
   const saveBatchEdit = async () => {
     if (!editingBatchId) return;
-    try {
-      await updateDoc(doc(db, "batches", editingBatchId), editingBatchData);
-      setEditingBatchId(null);
-    } catch (e) {
-      console.error("Error updating batch:", e);
-    }
+    const updated = batchEntries.map((b) =>
+      b.id === editingBatchId ? { ...b, ...editingBatchData } : b
+    );
+    await persistBatches(updated);
+    setEditingBatchId(null);
   };
 
   const deleteBatchEntry = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, "batches", id));
-    } catch (e) {
-      console.error("Error deleting batch:", e);
-    }
+    await persistBatches(batchEntries.filter((b) => b.id !== id));
   };
 
   // Load saved blocks from localStorage/Firebase
