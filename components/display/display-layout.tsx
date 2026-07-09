@@ -414,12 +414,12 @@ function DepartmentHighlights({
               </div>
             </div>
             <div style={{ background: "#ffffff", borderRadius: "1.9vh", padding: "1.4vh 2.2vh", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Placements</span>
-              <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{current.placements || "00"}</span>
+              <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Placements Offers</span>
+              <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{current.placements || "-"}</span>
             </div>
             <div style={{ background: "#ffffff", borderRadius: "1.9vh", padding: "1.4vh 2.2vh", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Higher Study</span>
-              <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{current.higherStudy || "00"}</span>
+              <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{current.higherStudy || "-"}</span>
             </div>
           </div>
         ))}
