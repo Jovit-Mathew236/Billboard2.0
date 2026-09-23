@@ -1,8 +1,10 @@
-import Login from "@/components/madeups/login/login";
-import React from "react";
+import { Suspense } from "react";
+import { LoginForm } from "@/components/auth/login-form";
 
-const Home = () => {
-  return <Login />;
-};
-
-export default Home;
+export default function Page() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}

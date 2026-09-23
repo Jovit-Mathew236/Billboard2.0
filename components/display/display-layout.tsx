@@ -3,52 +3,20 @@ import { useEffect, useState, type ReactNode, type CSSProperties } from "react";
 import localFont from "next/font/local";
 import { Clock3, GraduationCap, Sun } from "lucide-react";
 import {
-  collection,
-  onSnapshot,
-  query,
-  doc,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
-import { findBatchTable, parseBatchTable, TableBlockLike } from "@/lib/utils/batches";
+  useBatches,
+  useCarouselImages,
+  useDisplaySettings,
+  useFaculty,
+  useStaffPositions,
+} from "@/hooks/use-display-data";
+import { BatchEntry } from "@/lib/utils/batches";
+import { CarouselImage, FacultyMember } from "@/types/display";
+import { EditHotspot, EditModeProvider, useEditModeState } from "./edit-hotspot";
 
 const geistSans = localFont({
   src: "../../app/fonts/GeistVF.woff",
   weight: "100 900",
 });
-
-// ─────────────────── Types ───────────────────
-interface Settings {
-  backgroundColor: string;
-  headerText: string;
-  title: string;
-  backgroundImageUrl: string;
-  logoText?: string;
-  batchYear?: string;
-  studentCount?: string;
-  placements?: string;
-  higherStudy?: string;
-}
-
-interface BatchEntry {
-  id: string;
-  batchYear: string;
-  studentCount: string;
-  placements: string;
-  higherStudy: string;
-  row?: string[];
-}
-
-interface StaffPosition {
-  position: string;
-  count: string;
-  icon?: string;
-}
-
-interface FacultyMember {
-  id: string;
-  name: string;
-  specializedIn: string;
-}
 
 interface NewsItem {
   uuid: string;
@@ -61,12 +29,21 @@ interface WeatherData {
   EpochDateTime?: number;
 }
 
-interface CarouselImage {
-  id: string;
-  imageUrl: string;
+// ─────────────────── Gradient ───────────────────
+const WEATHER_REFRESH_MS = 15 * 60 * 1000;
+const NIGHTLY_RELOAD_HOUR = 3;
+
+function useNightlyReload(enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return;
+    const next = new Date();
+    next.setHours(NIGHTLY_RELOAD_HOUR, 0, 0, 0);
+    if (next.getTime() <= Date.now()) next.setDate(next.getDate() + 1);
+    const id = setTimeout(() => window.location.reload(), next.getTime() - Date.now());
+    return () => clearTimeout(id);
+  }, [enabled]);
 }
 
-// ─────────────────── Gradient ───────────────────
 const GRAD =
   "linear-gradient(160deg, #3b2fa0 0%, #5b3ec8 35%, #6d3bbd 60%, #4e2a9a 100%)";
 
@@ -88,10 +65,14 @@ function WeatherTimePill() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/services/weather")
-      .then((r) => r.json())
-      .then((d) => setWeather(d?.[0] ?? null))
-      .catch(() => {});
+    const load = () =>
+      fetch("/api/services/weather")
+        .then((r) => r.json())
+        .then((d) => d?.[0] && setWeather(d[0]))
+        .catch(() => {});
+    load();
+    const id = setInterval(load, WEATHER_REFRESH_MS);
+    return () => clearInterval(id);
   }, []);
 
   const tempC = weather?.Temperature?.Value
@@ -131,7 +112,7 @@ function WeatherTimePill() {
 }
 
 // ─────────────────── StaffStatCard ───────────────────
-function StaffStatCard({ position, count }: StaffPosition) {
+function StaffStatCard({ position, count }: { position: string; count: string }) {
   return (
     <div
       style={{
@@ -437,7 +418,7 @@ function NewsTickerBottom() {
     const load = () =>
       fetch("/api/services/news")
         .then((r) => r.json())
-        .then((d) => setNews(d?.data ?? []))
+        .then((d) => d?.data?.length && setNews(d.data))
         .catch(() => {});
     load();
     const id = setInterval(load, 300000);
@@ -502,68 +483,21 @@ function NewsTickerBottom() {
 
 // ─────────────────── Main Layout ───────────────────
 export default function DisplayLayout() {
-  const [settings, setSettings] = useState<Settings>({
-    backgroundColor: "#3b2fa0",
-    headerText: "Department of",
-    title: "Electronics & Computer Engineering",
-    backgroundImageUrl: "",
-    logoText: "er",
-    batchYear: "2021-2025",
-    studentCount: "60",
-    placements: "59",
-    higherStudy: "3",
-  });
-
-  const [positions, setPositions] = useState<StaffPosition[]>([]);
-  const [faculty, setFaculty] = useState<FacultyMember[]>([]);
-  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
-  const [batches, setBatches] = useState<BatchEntry[]>([]);
+  const { data: settings } = useDisplaySettings();
+  const { data: positions } = useStaffPositions();
+  const { data: faculty } = useFaculty();
+  const { data: carouselImages } = useCarouselImages();
+  const { entries: batches } = useBatches();
+  const editMode = useEditModeState();
+  useNightlyReload(!editMode.enabled);
 
   const displayTitle =
     settings.title?.trim().toUpperCase() === "ELECTRONICS AND COMPUTER ENGINEERING"
       ? "Electronics & Computer Engineering"
       : settings.title;
 
-  useEffect(() => {
-    const unsub = onSnapshot(doc(db, "settings", "global"), (snap) => {
-      if (snap.exists()) setSettings((prev) => ({ ...prev, ...(snap.data() as Settings) }));
-    });
-    return unsub;
-  }, []);
-
-  useEffect(() => {
-    const unsub = onSnapshot(query(collection(db, "position")), (snap) => {
-      setPositions(snap.docs.map((d) => ({ position: d.data().position, count: d.data().count })));
-    });
-    return unsub;
-  }, []);
-
-  useEffect(() => {
-    const unsub = onSnapshot(query(collection(db, "fields")), (snap) => {
-      setFaculty(
-        snap.docs.map((d) => ({ id: d.id, name: d.data().name, specializedIn: d.data().specializedIn ?? "" }))
-      );
-    });
-    return unsub;
-  }, []);
-
-  useEffect(() => {
-    const unsub = onSnapshot(query(collection(db, "images")), (snap) => {
-      setCarouselImages(snap.docs.map((d) => ({ id: d.id, imageUrl: d.data().imageUrl })));
-    });
-    return unsub;
-  }, []);
-
-  useEffect(() => {
-    const unsub = onSnapshot(query(collection(db, "blocks")), (snap) => {
-      const blocks = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as TableBlockLike[];
-      const table = findBatchTable(blocks);
-      setBatches(table ? parseBatchTable(table) : []);
-    });
-    return unsub;
-  }, []);
-
   return (
+    <EditModeProvider value={editMode}>
     <div
       className={geistSans.className}
       style={{
@@ -596,6 +530,7 @@ export default function DisplayLayout() {
       {/* ── Row 1: Weather / Time pill ── */}
       <div style={{ display: "flex", justifyContent: "center", position: "relative", zIndex: 1, flexShrink: 0 }}>
         <WeatherTimePill />
+        <EditHotspot region="weather" />
       </div>
 
       {/* ── Row 2: Logo + Department name ── */}
@@ -640,15 +575,17 @@ export default function DisplayLayout() {
             {displayTitle}
           </div>
         </div>
+        <EditHotspot region="branding" />
       </div>
 
       {/* ── Row 3: Staff stat cards ── */}
       <div style={{ display: "flex", gap: "1.4vh", position: "relative", zIndex: 1, flexShrink: 0 }}>
         {positions.length > 0
-          ? positions.map((p, i) => <StaffStatCard key={i} {...p} />)
+          ? positions.map((p) => <StaffStatCard key={p.id} position={p.position} count={p.count} />)
           : ["PoP", "Asst Prof", "Asso Prof", "Technical Staff"].map((p) => (
               <StaffStatCard key={p} position={p} count="—" />
             ))}
+        <EditHotspot region="staff" />
       </div>
 
       {/* ── Row 4: Faculty list (left) + Carousel + Stats (right column) ── */}
@@ -662,8 +599,9 @@ export default function DisplayLayout() {
           alignItems: "stretch",
         }}
       >
-        <div style={{ flex: "0 0 48%", minWidth: 0, minHeight: 0 }}>
+        <div style={{ flex: "0 0 48%", minWidth: 0, minHeight: 0, position: "relative" }}>
           <FacultyCard members={faculty} />
+          <EditHotspot region="faculty" />
         </div>
 
         <div
@@ -673,13 +611,15 @@ export default function DisplayLayout() {
             display: "flex",
             flexDirection: "column",
             gap: "1.1vh",
-            overflow: "hidden",
+            overflow: editMode.enabled ? "visible" : "hidden",
           }}
         >
-          <div style={{ width: "100%", aspectRatio: "3 / 4", flexShrink: 0 }}>
+          <div style={{ width: "100%", aspectRatio: "3 / 4", flexShrink: 0, position: "relative" }}>
             <ImageCarousel images={carouselImages} />
+            <EditHotspot region="gallery" />
           </div>
 
+          <div style={{ position: "relative", flexShrink: 0 }}>
           <DepartmentHighlights
             batches={batches}
             fallback={{
@@ -689,13 +629,17 @@ export default function DisplayLayout() {
               higherStudy: settings.higherStudy,
             }}
           />
+          <EditHotspot region="batches" />
+          </div>
         </div>
       </div>
 
       {/* ── Row 5: News ticker ── */}
       <div style={{ height: "10.5vw", flexShrink: 0, position: "relative", zIndex: 1 }}>
         <NewsTickerBottom />
+        <EditHotspot region="news" />
       </div>
     </div>
+    </EditModeProvider>
   );
 }

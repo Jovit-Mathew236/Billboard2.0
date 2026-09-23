@@ -42,6 +42,7 @@ const config: Config = {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        success: "hsl(var(--success))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -58,17 +59,8 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
-      backgroundImage: {
-        "gradient-custom":
-          "linear-gradient(90.27deg, hsl(var(--primary)) 9.83%, hsl(var(--accent)) 112.75%)",
-      },
     },
   },
   plugins: [animatePlugin],
-  safelist: [
-    {
-      pattern: /^col-span-/,
-    },
-  ],
 };
 export default config;

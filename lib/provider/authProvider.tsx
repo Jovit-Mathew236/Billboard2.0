@@ -1,65 +1,63 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { User } from "firebase/auth";
-import { auth } from "@/lib/firebase/config"; // Adjust this import path as needed
-import { useRouter } from "next/navigation";
-import { db } from "@/lib/firebase/config"; // Import Firestore instance
-import { doc, getDoc } from "firebase/firestore"; // Import Firestore functions
+import { onAuthStateChanged, User } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase/config";
+import { COLLECTIONS } from "@/lib/firebase/collections";
+import { UserRole } from "@/types/display";
 
 interface AuthContextType {
   user: User | null;
-  username: string | null; // Add username to context
-  userImage: string | null; // Add userImage to context
+  username: string;
+  userImage: string | null;
+  role: UserRole | null;
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  username: null,
+  username: "",
   userImage: null,
+  role: null,
   loading: true,
 });
 
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [username, setUsername] = useState<string | null>(null); // State for username
-  const [userImage, setUserImage] = useState<string | null>(null); // State for userImage
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [state, setState] = useState<AuthContextType>({
+    user: null,
+    username: "",
+    userImage: null,
+    role: null,
+    loading: true,
+  });
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      setUser(user);
-      setLoading(true); // Start loading
-      if (!user) {
-        router.push("/login");
-      }
-      if (user) {
-        const userDoc = doc(db, "users", user.uid); // Adjust collection name as needed
-        const docSnap = await getDoc(userDoc);
-
-        if (docSnap.exists()) {
-          const userData = docSnap.data();
-          setUsername(userData.username || null); // Set username if exists
-          setUserImage(userData.imageUrl || null); // Set userImage if exists
-        } else {
-          console.error("No such document!");
+  useEffect(
+    () =>
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          setState({ user: null, username: "", userImage: null, role: null, loading: false });
+          return;
         }
-        // router.push("/admin"); // Redirect after fetching user data
-      }
-
-      setLoading(false); // Stop loading
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
-  return (
-    <AuthContext.Provider value={{ user, username, userImage, loading }}>
-      {!loading && children}
-    </AuthContext.Provider>
+        const fallbackName = user.displayName || user.email?.split("@")[0] || "User";
+        try {
+          const snap = await getDoc(doc(db, COLLECTIONS.users, user.uid));
+          const profile = snap.data();
+          setState({
+            user,
+            username: profile?.username || fallbackName,
+            userImage: profile?.imageUrl || null,
+            role: (profile?.role as UserRole) ?? null,
+            loading: false,
+          });
+        } catch {
+          setState({ user, username: fallbackName, userImage: null, role: null, loading: false });
+        }
+      }),
+    []
   );
+
+  return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
 }

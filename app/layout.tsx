@@ -4,21 +4,6 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 
-// const geistSans = localFont({
-//   src: "./fonts/GeistVF.woff",
-//   variable: "--font-geist-sans",
-//   weight: "100 900",
-// });
-// const geistMono = localFont({
-//   src: "./fonts/GeistMonoVF.woff",
-//   variable: "--font-geist-mono",
-//   weight: "100 900",
-// });
-// const calSans = localFont({
-//   src: "./fonts/CalSans-SemiBold.woff",
-//   variable: "--font-cal-sans",
-//   weight: "100 900",
-// });
 const sfUiDisplay = localFont({
   src: [
     {
@@ -71,11 +56,12 @@ const sfUiDisplay = localFont({
 
 export const metadata: Metadata = {
   title: "Billboard",
-  description: "App for manage realtime billboards",
+  description: "Manage real-time department billboards",
   manifest: "/site.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
+    startupImage: ["/splash.png"],
     title: "Billboard",
   },
   icons: {
@@ -86,10 +72,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0ed3cf",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8f8fc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f0d17" },
+  ],
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  viewportFit: "cover",
 };
 export default function RootLayout({
   children,
@@ -99,52 +88,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-        />
-
-        <link rel="apple-touch-startup-image" href="/splash.png" />
-        {/* Add multiple splash screen images for different iOS device sizes */}
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash-640x1136.png"
-          media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash-750x1334.png"
-          media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash-1242x2208.png"
-          media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash-1125x2436.png"
-          media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash-1536x2048.png"
-          media="(min-device-width: 768px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 2)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash-1668x2224.png"
-          media="(min-device-width: 834px) and (max-device-width: 834px) and (-webkit-min-device-pixel-ratio: 2)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash-2048x2732.png"
-          media="(min-device-width: 1024px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 2)"
-        />
-        {/* manifest */}
         <link rel="manifest" href="/site.webmanifest" />
       </head>
-      <body className={`${sfUiDisplay.className} `}>
+      <body className={sfUiDisplay.className}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

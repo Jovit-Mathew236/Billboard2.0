@@ -1,8 +1,7 @@
-import EditDashboard from "@/components/madeups/admin/editDashboard";
-import React from "react";
+import { VisualEditor } from "@/components/admin/sections/visual-editor";
 
-const Home = () => {
-  return <EditDashboard />;
-};
+export const metadata = { title: "Edit display" };
 
-export default Home;
+export default function Page() {
+  return <VisualEditor />;
+}

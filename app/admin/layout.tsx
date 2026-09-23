@@ -1,22 +1,15 @@
 import type { Metadata } from "next";
-import HeaderButtons from "@/components/ui/headerButtons"; // Import the new component
 import { AuthProvider } from "@/lib/provider/authProvider";
+import { AdminShell } from "@/components/admin/admin-shell";
 
 export const metadata: Metadata = {
-  title: "Billboard | admin",
+  title: { default: "Dashboard | Billboard", template: "%s | Billboard" },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div>
-      <AuthProvider>
-        <HeaderButtons />
-        <div className="px-6 mt-[0dvh]">{children}</div>
-      </AuthProvider>
-    </div>
+    <AuthProvider>
+      <AdminShell>{children}</AdminShell>
+    </AuthProvider>
   );
 }

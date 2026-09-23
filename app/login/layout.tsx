@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
+
 export const metadata: Metadata = {
-  title: "Billboard | Login",
+  title: "Sign in | Billboard",
 };
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return <>{children}</>;
+
+export default function LoginLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return children;
 }

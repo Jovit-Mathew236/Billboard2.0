@@ -1,8 +1,7 @@
-import Preview from "@/components/madeups/admin/preivew/preview";
-import React from "react";
+import { PreviewPanel } from "@/components/admin/sections/preview-panel";
 
-const Home = () => {
-  return <Preview />;
-};
+export const metadata = { title: "Live preview" };
 
-export default Home;
+export default function Page() {
+  return <PreviewPanel />;
+}

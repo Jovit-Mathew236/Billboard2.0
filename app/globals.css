@@ -3,53 +3,52 @@
 @tailwind utilities;
 
 @layer base {
-
   :root {
-    --background: 341 100% 100%;
-    --foreground: 341 5% 10%;
-    --card: 341 50% 100%;
-    --card-foreground: 341 5% 15%;
-    --popover: 341 100% 100%;
-    --popover-foreground: 341 100% 10%;
-    --primary: 341 94% 46%;
+    --background: 240 20% 98%;
+    --foreground: 246 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 246 30% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 246 30% 12%;
+    --primary: 253 56% 52%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 341 30% 90%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 303 30% 95%;
-    --muted-foreground: 341 5% 40%;
-    --accent: 303 30% 90%;
-    --accent-foreground: 341 5% 15%;
-    --destructive: 0 100% 50%;
-    --destructive-foreground: 341 5% 100%;
-    --border: 341 30% 82%;
-    --input: 341 30% 50%;
-    --ring: 341 94% 46%;
-    --radius: 1rem;
+    --secondary: 250 30% 95%;
+    --secondary-foreground: 250 40% 22%;
+    --muted: 245 20% 95%;
+    --muted-foreground: 245 10% 44%;
+    --accent: 252 60% 96%;
+    --accent-foreground: 253 56% 40%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 60% 38%;
+    --border: 245 18% 90%;
+    --input: 245 18% 86%;
+    --ring: 253 56% 52%;
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 341 50% 10%;
-    --foreground: 341 5% 100%;
-    --card: 341 50% 10%;
-    --card-foreground: 341 5% 100%;
-    --popover: 341 50% 5%;
-    --popover-foreground: 341 5% 100%;
-    --primary: 341 94% 46%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 341 30% 20%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 303 30% 25%;
-    --muted-foreground: 341 5% 65%;
-    --accent: 303 30% 25%;
-    --accent-foreground: 341 5% 95%;
-    --destructive: 0 100% 50%;
-    --destructive-foreground: 341 5% 100%;
-    --border: 341 30% 50%;
-    --input: 341 30% 50%;
-    --ring: 341 94% 46%;
-    --radius: 1rem;
+    --background: 248 28% 7%;
+    --foreground: 245 20% 96%;
+    --card: 248 24% 10%;
+    --card-foreground: 245 20% 96%;
+    --popover: 248 24% 11%;
+    --popover-foreground: 245 20% 96%;
+    --primary: 253 80% 70%;
+    --primary-foreground: 250 50% 10%;
+    --secondary: 248 20% 16%;
+    --secondary-foreground: 245 20% 92%;
+    --muted: 248 18% 15%;
+    --muted-foreground: 245 10% 64%;
+    --accent: 253 30% 18%;
+    --accent-foreground: 253 80% 82%;
+    --destructive: 0 70% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 55% 52%;
+    --border: 248 16% 18%;
+    --input: 248 16% 22%;
+    --ring: 253 80% 70%;
   }
-
 }
 
 @layer base {
@@ -58,191 +57,92 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
   }
 
-  .edit-dashboard-block .text-6xl {
-    font-size: 3rem !important;
-  }
+  @media (display-mode: standalone) {
+    body {
+      overscroll-behavior-y: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
 
-
-  .display-layout {
-    overflow: hidden;
-    box-sizing: border-box;
-  }
-
-  .display-layout .rounded-lg {
-    border-radius: 2.5rem;
-  }
-
-  .display-layout .shadow-2xl {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  }
-
-  .display-layout .text-6xl {
-    font-size: 3.5rem !important;
-  }
-
-  .display-layout .text-8xl {
-    font-size: 4.5rem !important;
-  }
-
-  .display-layout .text-5xl {
-    font-size: 3rem !important;
-  }
-
-  /* Increased heading sizes for 4K display */
-  .display-layout h1 {
-    font-size: 5rem !important;
-    /* ~80px */
-    line-height: 1.1 !important;
-    font-weight: 800 !important;
-    margin-bottom: 1rem !important;
-  }
-
-  .display-layout h2 {
-    font-size: 4rem !important;
-    /* ~64px */
-    line-height: 1.1 !important;
-    font-weight: 700 !important;
-    margin-bottom: 0.75rem !important;
-  }
-
-  .display-layout h3 {
-    font-size: 3.5rem !important;
-    /* ~56px */
-    line-height: 1.2 !important;
-    font-weight: 700 !important;
-    margin-bottom: 0.75rem !important;
-  }
-
-  .display-layout h4 {
-    font-size: 3rem !important;
-    /* ~48px */
-    line-height: 1.2 !important;
-    font-weight: 600 !important;
-    margin-bottom: 0.5rem !important;
-  }
-
-  .display-layout h5 {
-    font-size: 2.5rem !important;
-    /* ~40px */
-    line-height: 1.3 !important;
-    font-weight: 600 !important;
-    margin-bottom: 0.5rem !important;
-  }
-
-  .display-layout h6 {
-    font-size: 2rem !important;
-    /* ~32px */
-    line-height: 1.3 !important;
-    font-weight: 600 !important;
-    margin-bottom: 0.5rem !important;
-  }
-
-  /* Increased paragraph and other text for 4K display */
-  .display-layout p,
-  .display-layout li,
-  .display-layout a {
-    font-size: 1.75rem !important;
-    /* ~28px */
-    line-height: 1.6 !important;
-  }
-
-  /* Make sure block content gets the font size too */
-  .display-layout .text-3xl {
-    font-size: 3rem !important;
-  }
-
-  .display-layout .text-4xl {
-    font-size: 4rem !important;
-  }
-
-  .display-layout .text-6xl {
-    font-size: 6rem !important;
-  }
-
-  /* Table styles for 4K display */
-  .display-layout table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1.5rem !important;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
-    border-radius: 1rem !important;
-    overflow: hidden !important;
-  }
-
-  .display-layout table tr:nth-child(even) {
-    background-color: rgba(0, 0, 0, 0.03) !important;
-  }
-
-  .display-layout th {
-    font-size: 3.5rem !important;
-    padding: 2rem !important;
-    font-weight: 700 !important;
-    text-align: left;
-    border: 3px solid rgba(0, 0, 0, 0.1);
-    background-color: rgba(0, 0, 0, 0.07);
-    vertical-align: middle !important;
-  }
-
-  .display-layout td {
-    font-size: 3rem !important;
-    padding: 1.75rem 2rem !important;
-    border: 3px solid rgba(0, 0, 0, 0.1);
-    vertical-align: middle !important;
-  }
-
-  .display-layout li {
-    font-size: 3.75rem !important;
+    input,
+    textarea,
+    [contenteditable] {
+      -webkit-user-select: text;
+      user-select: text;
+    }
   }
 }
 
-.content-block {
-  @apply transition-colors duration-200;
-}
-
-.content-block.light {
-  @apply bg-background text-foreground;
-}
-
-.content-block.dark {
-  @apply bg-background text-foreground;
-}
-
-/* Custom scrollbar styles */
 @layer utilities {
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  .brand-gradient {
+    background-image: linear-gradient(160deg, #3b2fa0 0%, #5b3ec8 35%, #6d3bbd 60%, #4e2a9a 100%);
   }
 
-  .scrollbar-thin::-webkit-scrollbar-track {
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+@layer components {
+  .edit-hotspot {
+    position: absolute;
+    inset: -0.5vh;
+    z-index: 20;
+    cursor: pointer;
+    border-radius: 2.4vh;
+    border: 0.35vh solid transparent;
     background: transparent;
+    transition: border-color 150ms ease, background-color 150ms ease;
   }
 
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 9999px;
+  .edit-hotspot:hover,
+  .edit-hotspot.is-active {
+    border-color: #c4b5fd;
+    background: rgba(196, 181, 253, 0.14);
   }
 
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+  .edit-hotspot.is-active {
+    border-color: #ffffff;
+    box-shadow: 0 0 0 0.6vh rgba(139, 92, 246, 0.55);
   }
 
-  .scrollbar-thumb-white\/20::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+  .edit-hotspot-label {
+    position: absolute;
+    top: 1vh;
+    left: 1vh;
+    padding: 0.5vh 1.2vh;
+    border-radius: 999px;
+    background: #7c3aed;
+    color: #fff;
+    font-size: 1.6vh;
+    font-weight: 600;
+    letter-spacing: 0;
+    opacity: 0;
+    transition: opacity 150ms ease;
   }
 
-  .scrollbar-track-transparent::-webkit-scrollbar-track {
-    background: transparent;
+  @media (hover: none) {
+    .edit-hotspot {
+      border-style: dashed;
+      border-color: rgba(196, 181, 253, 0.55);
+    }
   }
 
-  /* Line clamp utilities */
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  .edit-hotspot:hover .edit-hotspot-label,
+  .edit-hotspot.is-active .edit-hotspot-label {
+    opacity: 1;
   }
 }
