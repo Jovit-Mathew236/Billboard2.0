@@ -3,7 +3,8 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ExternalLink, Loader2, LucideIcon, MoreHorizontal } from "lucide-react";
+import { ExternalLink, LucideIcon, MoreHorizontal } from "lucide-react";
+import { SplashScreen } from "@/components/splash-screen";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { useAuth } from "@/lib/provider/authProvider";
@@ -68,15 +69,25 @@ function TabIcon({ icon: Icon, active }: { icon: LucideIcon; active: boolean }) 
   );
 }
 
-function FullScreenLoader() {
-  return (
-    <div className="flex h-dvh flex-col items-center justify-center gap-4">
-      <span className="brand-gradient flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-black text-white shadow-lg motion-safe:animate-pulse">
-        B
-      </span>
-      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-    </div>
-  );
+const SPLASH_MIN_MS = 900;
+const SPLASH_FADE_MS = 500;
+
+function useSplash(ready: boolean) {
+  const [phase, setPhase] = useState<"visible" | "leaving" | "done">("visible");
+  const [mountedAt] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!ready || phase !== "visible") return;
+    const wait = Math.max(0, SPLASH_MIN_MS - (Date.now() - mountedAt));
+    const leave = setTimeout(() => setPhase("leaving"), wait);
+    const done = setTimeout(() => setPhase("done"), wait + SPLASH_FADE_MS);
+    return () => {
+      clearTimeout(leave);
+      clearTimeout(done);
+    };
+  }, [ready, phase, mountedAt]);
+
+  return phase;
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
@@ -94,7 +105,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
     if (!loading && !user) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
   }, [loading, user, router, pathname]);
 
-  if (loading || !user) return <FullScreenLoader />;
+  const splash = useSplash(!loading && !!user);
+  const splashLayer = splash !== "done" && <SplashScreen leaving={splash === "leaving"} />;
+
+  if (loading || !user) return <SplashScreen />;
 
   const current = NAV_ITEMS.find((item) => isActive(pathname, item.href));
   const mobileItems = NAV_ITEMS.filter((item) => item.mobile);
@@ -102,6 +116,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-dvh overflow-hidden">
+      {splashLayer}
       <aside className="hidden h-full w-[260px] shrink-0 flex-col border-r bg-card/50 px-3 py-5 lg:flex">
         <div className="px-3 pb-6">
           <Brand />

@@ -264,6 +264,10 @@ function ImageCarousel({ images }: { images: CarouselImage[] }) {
   const [idx, setIdx] = useState(0);
 
   useEffect(() => {
+    if (idx >= images.length) setIdx(0);
+  }, [idx, images.length]);
+
+  useEffect(() => {
     if (images.length < 2) return;
     const id = setInterval(() => setIdx((i) => (i + 1) % images.length), 5000);
     return () => clearInterval(id);
@@ -300,23 +304,27 @@ function ImageCarousel({ images }: { images: CarouselImage[] }) {
         background: "#e8e8ee",
       }}
     >
-      {images.map((img, i) => (
-        <img
-          key={img.id}
-          src={img.imageUrl}
-          alt={`photo-${i}`}
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            objectPosition: "center center",
-            opacity: i === idx ? 1 : 0,
-            transition: "opacity 1s ease",
-          }}
-        />
-      ))}
+      {images.map((img, i) => {
+        const offset = (i - idx + images.length) % images.length;
+        if (offset > 1 && offset !== images.length - 1) return null;
+        return (
+          <img
+            key={img.id}
+            src={img.imageUrl}
+            alt={`photo-${i}`}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              objectPosition: "center center",
+              opacity: i === idx ? 1 : 0,
+              transition: "opacity 1s ease",
+            }}
+          />
+        );
+      })}
     </div>
   );
 }

@@ -3,8 +3,7 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-const SCREEN_WIDTH = 3840;
-const SCREEN_HEIGHT = 2160;
+const ASPECT = 16 / 9;
 
 interface LivePreviewProps {
   className?: string;
@@ -24,13 +23,12 @@ export const LivePreview = forwardRef<HTMLIFrameElement, LivePreviewProps>(({ cl
     return () => observer.disconnect();
   }, []);
 
-  const scale = width / SCREEN_HEIGHT;
 
   return (
     <div
       ref={frameRef}
       className={cn("relative w-full overflow-hidden rounded-xl bg-[#1c1640] shadow-inner ring-1 ring-border", className)}
-      style={{ aspectRatio: `${SCREEN_HEIGHT} / ${SCREEN_WIDTH}` }}
+      style={{ aspectRatio: "9 / 16" }}
     >
       {!loaded && <div className="brand-gradient absolute inset-0 animate-pulse" />}
       {width > 0 && (
@@ -42,10 +40,10 @@ export const LivePreview = forwardRef<HTMLIFrameElement, LivePreviewProps>(({ cl
           onLoad={() => setLoaded(true)}
           className={cn("absolute left-0 top-0 border-0", !interactive && "pointer-events-none")}
           style={{
-            width: SCREEN_WIDTH,
-            height: SCREEN_HEIGHT,
+            width: Math.round(width * ASPECT),
+            height: Math.round(width),
             transformOrigin: "top left",
-            transform: `translateX(${width}px) rotate(90deg) scale(${scale})`,
+            transform: `translateX(${width}px) rotate(90deg)`,
           }}
         />
       )}

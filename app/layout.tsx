@@ -65,7 +65,11 @@ export const metadata: Metadata = {
     title: "Billboard",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/android-chrome-192x192.png", type: "image/png", sizes: "192x192" },
+    ],
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
