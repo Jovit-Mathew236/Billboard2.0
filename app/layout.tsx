@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import { KeyboardInset } from "@/components/keyboard-inset";
+import { ThemeColorSync } from "@/components/theme-color-sync";
 
 const sfUiDisplay = localFont({
   src: [
@@ -76,13 +78,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8f8fc" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f0d17" },
-  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  interactiveWidget: "resizes-content",
 };
 export default function RootLayout({
   children,
@@ -104,6 +103,8 @@ export default function RootLayout({
           {children}
         </ThemeProvider>
         <Toaster />
+        <KeyboardInset />
+        <ThemeColorSync />
       </body>
     </html>
   );

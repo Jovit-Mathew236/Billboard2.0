@@ -157,7 +157,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </div>
         </main>
 
-        <nav className="pb-safe z-40 grid shrink-0 grid-cols-5 border-t bg-background pt-1.5 lg:hidden">
+        <nav className="app-tabbar pb-safe z-40 grid shrink-0 grid-cols-5 border-t bg-background pt-1.5 lg:hidden">
           {mobileItems.map((item) => {
             const active = isActive(pathname, item.href);
             return (
