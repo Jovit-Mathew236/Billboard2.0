@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 import { useEffect, useState, type ReactNode, type CSSProperties } from "react";
 import localFont from "next/font/local";
 import { Clock3, GraduationCap, Sun } from "lucide-react";
@@ -264,14 +265,12 @@ function ImageCarousel({ images }: { images: CarouselImage[] }) {
   const [idx, setIdx] = useState(0);
 
   useEffect(() => {
-    if (idx >= images.length) setIdx(0);
-  }, [idx, images.length]);
-
-  useEffect(() => {
     if (images.length < 2) return;
     const id = setInterval(() => setIdx((i) => (i + 1) % images.length), 5000);
     return () => clearInterval(id);
   }, [images.length]);
+
+  const current = images.length ? idx % images.length : 0;
 
   if (images.length === 0) {
     return (
@@ -305,7 +304,7 @@ function ImageCarousel({ images }: { images: CarouselImage[] }) {
       }}
     >
       {images.map((img, i) => {
-        const offset = (i - idx + images.length) % images.length;
+        const offset = (i - current + images.length) % images.length;
         if (offset > 1 && offset !== images.length - 1) return null;
         return (
           <img
@@ -319,7 +318,7 @@ function ImageCarousel({ images }: { images: CarouselImage[] }) {
               height: "100%",
               objectFit: "contain",
               objectPosition: "center center",
-              opacity: i === idx ? 1 : 0,
+              opacity: i === current ? 1 : 0,
               transition: "opacity 1s ease",
             }}
           />
@@ -356,7 +355,6 @@ function DepartmentHighlights({
     if (entries.length <= 1) return;
     const id = setInterval(() => setIdx((i) => (i + 1) % entries.length), 8000);
     return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entries.length]);
 
   const safeIdx = idx % entries.length;

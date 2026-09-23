@@ -7,7 +7,7 @@ export const signIn = (email: string, password: string) =>
 
 export const logOut = async () => {
   await signOut(auth);
-  window.location.href = "/login";
+  window.location.replace("/login");
 };
 
 export const resetPassword = (email: string) => sendPasswordResetEmail(auth, email.trim());

@@ -1,11 +1,15 @@
-import AWS from "aws-sdk";
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import { HttpError } from "./auth";
 
-const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_S3_ACCESS_KEY ?? process.env.NEXT_PUBLIC_AWS_S3_BUCKET_ACCESS_KEY,
-  secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY ?? process.env.NEXT_PUBLIC_AWS_S3_BUCKET_SECRET_ACCESS_KEY,
-  region: process.env.AWS_S3_REGION ?? process.env.NEXT_PUBLIC_AWA_S3_BUCKET_REGION,
+const region = process.env.AWS_S3_REGION ?? process.env.NEXT_PUBLIC_AWA_S3_BUCKET_REGION ?? "";
+
+const s3 = new S3Client({
+  region,
+  credentials: {
+    accessKeyId: process.env.AWS_S3_ACCESS_KEY ?? process.env.NEXT_PUBLIC_AWS_S3_BUCKET_ACCESS_KEY ?? "",
+    secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY ?? process.env.NEXT_PUBLIC_AWS_S3_BUCKET_SECRET_ACCESS_KEY ?? "",
+  },
 });
 
 const bucket = () => {
@@ -42,10 +46,11 @@ export async function uploadWebp(buffer: Buffer, profile: UploadProfile, name: s
     .toBuffer();
 
   const key = `${prefix}/${name}.webp`;
-  const result = await s3
-    .upload({ Bucket: bucket(), Key: key, Body: body, ContentType: "image/webp", CacheControl: "public, max-age=31536000, immutable" })
-    .promise();
-  return { url: result.Location, key };
+  const Bucket = bucket();
+  await s3.send(
+    new PutObjectCommand({ Bucket, Key: key, Body: body, ContentType: "image/webp", CacheControl: "public, max-age=31536000, immutable" })
+  );
+  return { url: `https://${Bucket}.s3.${region}.amazonaws.com/${key}`, key };
 }
 
 export const isManagedKey = (key: unknown): key is string =>
@@ -53,4 +58,4 @@ export const isManagedKey = (key: unknown): key is string =>
   !key.includes("..") &&
   Object.values(UPLOAD_PROFILES).some(({ prefix }) => key.startsWith(`${prefix}/`));
 
-export const deleteObject = (key: string) => s3.deleteObject({ Bucket: bucket(), Key: key }).promise();
+export const deleteObject = (key: string) => s3.send(new DeleteObjectCommand({ Bucket: bucket(), Key: key }));

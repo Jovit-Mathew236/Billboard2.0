@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { DisplayRegion, EDITOR_MESSAGE, isDisplayRegion, REGION_LABELS } from "@/lib/display/regions";
 
 interface EditModeState {
@@ -10,21 +10,26 @@ interface EditModeState {
 
 const EditModeContext = createContext<EditModeState>({ enabled: false, active: null });
 
+const subscribeNever = () => () => {};
+
+const isFramedEditor = () =>
+  new URLSearchParams(window.location.search).get("mode") === "edit" && window.parent !== window;
+
 export function useEditModeState(): EditModeState {
-  const [state, setState] = useState<EditModeState>({ enabled: false, active: null });
+  const enabled = useSyncExternalStore(subscribeNever, isFramedEditor, () => false);
+  const [active, setActive] = useState<DisplayRegion | null>(null);
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("mode") !== "edit" || window.parent === window) return;
-    setState({ enabled: true, active: null });
+    if (!enabled) return;
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin || event.data?.type !== EDITOR_MESSAGE.highlight) return;
-      setState({ enabled: true, active: isDisplayRegion(event.data.region) ? event.data.region : null });
+      setActive(isDisplayRegion(event.data.region) ? event.data.region : null);
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, []);
+  }, [enabled]);
 
-  return state;
+  return useMemo(() => ({ enabled, active }), [enabled, active]);
 }
 
 export const EditModeProvider = EditModeContext.Provider;

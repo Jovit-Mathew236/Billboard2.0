@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UserPlus, Users } from "lucide-react";
@@ -50,6 +50,7 @@ export function UserManager() {
     defaultValues: { username: "", email: "", password: "", role: "admin" },
   });
   const { errors } = form.formState;
+  const role = useWatch({ control: form.control, name: "role" });
 
   const openDialog = () => {
     form.reset();
@@ -115,7 +116,7 @@ export function UserManager() {
         <TextField label="Temporary password" type="password" autoComplete="new-password" error={errors.password?.message} hint="At least 8 characters." {...form.register("password")} />
         <div className="grid gap-1.5">
           <Label>Role</Label>
-          <Select value={form.watch("role")} onValueChange={(v) => form.setValue("role", v as UserRole)}>
+          <Select value={role} onValueChange={(v) => form.setValue("role", v as UserRole)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>

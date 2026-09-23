@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import {
   closestCenter,
   DndContext,
@@ -39,7 +39,11 @@ export function SortableList<T extends { id: string }>({
   className,
 }: SortableListProps<T>) {
   const [ordered, setOrdered] = useState(items);
-  useEffect(() => setOrdered(items), [items]);
+  const [source, setSource] = useState(items);
+  if (source !== items) {
+    setSource(items);
+    setOrdered(items);
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
