@@ -51,8 +51,11 @@ const radius = (vh: number) => `calc(${vh}vh * var(--display-radius-scale, 1))`;
 const innerRadius = (outerVh: number, paddingVh: number) =>
   `max(0.4vh, calc(${outerVh}vh * var(--display-radius-scale, 1) - ${paddingVh}vh))`;
 
+const outerRadius = (innerVh: number, paddingVh: number) =>
+  `calc(${innerVh}vh * var(--display-radius-scale, 1) + ${paddingVh}vh)`;
+
 const FACULTY_CARD = { radius: 2.75, padding: 2.75 };
-const HIGHLIGHT_PANEL = { radius: 2.6, padding: 1 };
+const HIGHLIGHT_PANEL = { innerRadius: 0.8, padding: 1 };
 
 const GRAD =
   "linear-gradient(160deg, #3b2fa0 0%, #5b3ec8 35%, #6d3bbd 60%, #4e2a9a 100%)";
@@ -472,7 +475,7 @@ function DepartmentHighlights({
         gap: "0.9vh",
         flexShrink: 0,
         padding: `${HIGHLIGHT_PANEL.padding}vh`,
-        borderRadius: radius(HIGHLIGHT_PANEL.radius),
+        borderRadius: outerRadius(HIGHLIGHT_PANEL.innerRadius, HIGHLIGHT_PANEL.padding),
         background: "rgba(38,30,92,0.55)",
         border: "1px solid rgba(255,255,255,0.14)",
         backdropFilter: "blur(10px)",
@@ -518,7 +521,7 @@ function HighlightTile({ label, value }: { label: string; value: string }) {
     <div
       style={{
         background: "rgba(16,12,40,0.88)",
-        borderRadius: innerRadius(HIGHLIGHT_PANEL.radius, HIGHLIGHT_PANEL.padding),
+        borderRadius: radius(HIGHLIGHT_PANEL.innerRadius),
         padding: "1.2vh 1.7vh",
         border: "1px solid rgba(255,255,255,0.08)",
       }}
@@ -534,7 +537,7 @@ function HighlightRow({ label, value }: { label: string; value: string }) {
     <div
       style={{
         background: "#ffffff",
-        borderRadius: innerRadius(HIGHLIGHT_PANEL.radius, HIGHLIGHT_PANEL.padding),
+        borderRadius: radius(HIGHLIGHT_PANEL.innerRadius),
         padding: "1.2vh 2vh",
         display: "flex",
         alignItems: "center",
