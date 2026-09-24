@@ -85,7 +85,7 @@ function SortableItem({ id, children }: { id: string; children: (handle: ReactNo
       {...attributes}
       {...listeners}
       aria-label="Drag to reorder"
-      className="flex h-8 w-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:cursor-grabbing"
+      className="rounded-inner flex h-8 w-8 shrink-0 cursor-grab touch-none items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:cursor-grabbing"
     >
       <GripVertical className="h-4 w-4" />
     </button>

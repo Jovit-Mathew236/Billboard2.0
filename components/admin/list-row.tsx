@@ -16,7 +16,7 @@ interface ListRowProps {
 
 export function ListRow({ handle, leading, title, subtitle, trailing, onEdit, onDelete, className }: ListRowProps) {
   return (
-    <div className={cn("flex min-w-0 items-center gap-2 rounded-xl border bg-card p-2 pr-2 sm:pr-3 shadow-sm transition-shadow motion-safe:duration-300 motion-safe:animate-in motion-safe:fade-in sm:gap-3", className)}>
+    <div className={cn("flex min-w-0 items-center gap-2 rounded-xl border bg-card p-2 pr-2 [--outer-padding:0.5rem] [--outer-radius:var(--radius-xl)] sm:pr-3 shadow-sm transition-shadow motion-safe:duration-300 motion-safe:animate-in motion-safe:fade-in sm:gap-3", className)}>
       {handle}
       {leading}
       <div className="min-w-0 flex-1 py-1">
@@ -26,12 +26,12 @@ export function ListRow({ handle, leading, title, subtitle, trailing, onEdit, on
       {trailing}
       <div className="flex shrink-0 items-center">
         {onEdit && (
-          <Button variant="ghost" size="icon-sm" onClick={onEdit} aria-label="Edit">
+          <Button variant="ghost" size="icon-sm" onClick={onEdit} aria-label="Edit" className="rounded-inner">
             <Pencil />
           </Button>
         )}
         {onDelete && (
-          <Button variant="ghost" size="icon-sm" onClick={onDelete} aria-label="Delete" className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+          <Button variant="ghost" size="icon-sm" onClick={onDelete} aria-label="Delete" className="rounded-inner text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
             <Trash2 />
           </Button>
         )}

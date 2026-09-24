@@ -47,8 +47,8 @@ export function ConfirmDialog({
           {description && <AlertDialogDescription>{description}</AlertDialogDescription>}
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2">
-          <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
-          <Button variant="destructive" onClick={confirm} disabled={pending}>
+          <AlertDialogCancel disabled={pending} className="rounded-inner">Cancel</AlertDialogCancel>
+          <Button variant="destructive" onClick={confirm} disabled={pending} className="rounded-inner">
             {pending && <Loader2 className="animate-spin" />}
             {confirmLabel}
           </Button>

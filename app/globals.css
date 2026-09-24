@@ -26,6 +26,12 @@
     --ring: 253 56% 52%;
     --radius: 1rem;
     --display-radius-scale: 2.85;
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --radius-2xl: calc(var(--radius) + 8px);
+    --radius-inner-min: 0.25rem;
   }
 
   .dark {
@@ -113,6 +119,10 @@ html[data-keyboard="open"] [role="dialog"] {
 }
 
 @layer utilities {
+  .rounded-inner {
+    border-radius: max(var(--radius-inner-min), calc(var(--outer-radius, var(--radius-xl)) - var(--outer-padding, 0px)));
+  }
+
   .splash-gradient-text {
     background-image: linear-gradient(90deg, #ff8a73 0%, #e0707e 45%, #a44f9c 100%);
     -webkit-background-clip: text;

@@ -48,6 +48,12 @@ function useNightlyReload(enabled: boolean) {
 
 const radius = (vh: number) => `calc(${vh}vh * var(--display-radius-scale, 1))`;
 
+const innerRadius = (outerVh: number, paddingVh: number) =>
+  `max(0.4vh, calc(${outerVh}vh * var(--display-radius-scale, 1) - ${paddingVh}vh))`;
+
+const FACULTY_CARD = { radius: 2.75, padding: 2.75 };
+const HIGHLIGHT_PANEL = { radius: 2.6, padding: 1 };
+
 const GRAD =
   "linear-gradient(160deg, #3b2fa0 0%, #5b3ec8 35%, #6d3bbd 60%, #4e2a9a 100%)";
 
@@ -260,7 +266,7 @@ function LabRow({ lab }: { lab: Lab }) {
         style={{
           flex: "0 0 40%",
           aspectRatio: "16 / 11",
-          borderRadius: radius(1.9),
+          borderRadius: innerRadius(FACULTY_CARD.radius, FACULTY_CARD.padding),
           overflow: "hidden",
           background: lab.thumbnailUrl ? "#e8e8ee" : GRAD,
           display: "flex",
@@ -305,8 +311,8 @@ function FacultyCard({ members, labs }: { members: FacultyMember[]; labs: Lab[] 
       <div
         style={{
           background: "#fff",
-          borderRadius: radius(2.75),
-          padding: "2.75vh 3vh",
+          borderRadius: radius(FACULTY_CARD.radius),
+          padding: `${FACULTY_CARD.padding}vh 3vh`,
           width: "100%",
           height: "100%",
           overflow: "hidden",
@@ -465,8 +471,8 @@ function DepartmentHighlights({
         flexDirection: "column",
         gap: "0.9vh",
         flexShrink: 0,
-        padding: "1vh",
-        borderRadius: radius(2.6),
+        padding: `${HIGHLIGHT_PANEL.padding}vh`,
+        borderRadius: radius(HIGHLIGHT_PANEL.radius),
         background: "rgba(38,30,92,0.55)",
         border: "1px solid rgba(255,255,255,0.14)",
         backdropFilter: "blur(10px)",
@@ -512,7 +518,7 @@ function HighlightTile({ label, value }: { label: string; value: string }) {
     <div
       style={{
         background: "rgba(16,12,40,0.88)",
-        borderRadius: radius(1.9),
+        borderRadius: innerRadius(HIGHLIGHT_PANEL.radius, HIGHLIGHT_PANEL.padding),
         padding: "1.2vh 1.7vh",
         border: "1px solid rgba(255,255,255,0.08)",
       }}
@@ -528,7 +534,7 @@ function HighlightRow({ label, value }: { label: string; value: string }) {
     <div
       style={{
         background: "#ffffff",
-        borderRadius: radius(1.9),
+        borderRadius: innerRadius(HIGHLIGHT_PANEL.radius, HIGHLIGHT_PANEL.padding),
         padding: "1.2vh 2vh",
         display: "flex",
         alignItems: "center",
@@ -578,19 +584,24 @@ function NewsTickerBottom() {
     <div
       style={{
         width: "100%",
-        height: "100%",
-        background: "rgba(18,14,48,0.85)",
-        backdropFilter: "blur(14px)",
-        borderRadius: radius(2.2),
-        padding: "0 3.9vh",
-        border: "1px solid rgba(255,255,255,0.1)",
+        minHeight: "19vh",
+        display: "flex",
+        alignItems: "center",
+        background: "rgba(18,14,48,0.55)",
+
+        backdropFilter: "blur(20px) saturate(140%)",
+        WebkitBackdropFilter: "blur(20px) saturate(140%)",
+        borderRadius: radius(2.4),
+        padding: "2.6vh 4.4vh",
+        border: "1px solid rgba(255,255,255,0.14)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 1.2vh 3vh rgba(10,6,40,0.25)",
         boxSizing: "border-box",
       }}
     >
       <CrossFade
         index={safeIdx}
         duration={800}
-        style={{ width: "100%", height: "100%" }}
+        style={{ width: "100%" }}
         slides={headlines.map((headline, h) => (
           <div
             key={h}
@@ -601,10 +612,12 @@ function NewsTickerBottom() {
               alignItems: "center",
               justifyContent: "center",
               color: "#fff",
-              fontSize: "2.2vh",
+              fontSize: "3.2vh",
               fontWeight: 500,
               textAlign: "center",
-              lineHeight: 1.55,
+              lineHeight: 1.35,
+              letterSpacing: "-0.01em",
+              textWrap: "balance",
             }}
           >
             {headline}
@@ -769,7 +782,7 @@ export default function DisplayLayout() {
       </div>
 
       {/* ── Row 5: News ticker ── */}
-      <div style={{ height: "10.5vw", flexShrink: 0, position: "relative", zIndex: 1 }}>
+      <div style={{ flexShrink: 0, position: "relative", zIndex: 1, marginTop: "1.4vh" }}>
         <NewsTickerBottom />
         <EditHotspot region="news" />
       </div>

@@ -80,7 +80,7 @@ export function GalleryManager() {
           onReorder={(items) => run(() => reorderCarouselImages(items.map((i) => i.id)), { error: "Couldn't save the new order" })}
           className={grid}
           renderItem={(image, handle, index) => (
-            <Card className="group overflow-hidden">
+            <Card className="group overflow-hidden [--outer-padding:0.375rem] sm:[--outer-padding:0.375rem]">
               <div className="relative aspect-[3/4] bg-muted">
                 <img src={image.imageUrl} alt={`Carousel photo ${index + 1}`} loading="lazy" className="h-full w-full object-cover" />
                 <span className="absolute left-2 top-2 rounded-md bg-black/60 px-1.5 py-0.5 text-xs font-medium text-white">{index + 1}</span>
@@ -93,7 +93,7 @@ export function GalleryManager() {
                   size="icon-sm"
                   aria-label="Delete photo"
                   onClick={() => setDeleting(image)}
-                  className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  className="rounded-inner text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                 >
                   <Trash2 />
                 </Button>

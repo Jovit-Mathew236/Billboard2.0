@@ -83,7 +83,7 @@ export function Dashboard() {
               <CardDescription>The header that appears at the top of the display.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="brand-gradient flex items-center gap-3 rounded-xl p-4 text-white sm:gap-4 sm:p-5">
+              <div className="brand-gradient rounded-inner flex items-center gap-3 p-4 text-white sm:gap-4 sm:p-5">
                 <span className="shrink-0 text-3xl font-black tracking-tighter sm:text-4xl">{settings.data.logoText || "er"}</span>
                 <span className="h-10 w-px shrink-0 bg-white/40" />
                 <div className="min-w-0">
@@ -107,7 +107,7 @@ export function Dashboard() {
                 <Link
                   key={check.label}
                   href={check.href}
-                  className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/60"
+                  className="rounded-inner flex items-center gap-3 border p-3 transition-colors hover:bg-muted/60"
                 >
                   {check.ok ? (
                     <CheckCircle2 className="h-5 w-5 shrink-0 text-success" />
@@ -124,8 +124,8 @@ export function Dashboard() {
           </Card>
         </div>
 
-        <Card className="h-fit p-3">
-          <LivePreview />
+        <Card className="h-fit p-3 [--outer-padding:0.75rem] sm:[--outer-padding:0.75rem]">
+          <LivePreview className="rounded-inner" />
           <p className="px-1 pt-3 text-center text-xs text-muted-foreground">Live view of the billboard</p>
         </Card>
       </div>

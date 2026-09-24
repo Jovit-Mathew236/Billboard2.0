@@ -122,7 +122,7 @@ export function Branding() {
             </CardHeader>
             <CardContent className={cn("grid gap-4", embedded ? "grid-cols-[96px_1fr]" : "sm:grid-cols-[160px_1fr]")}>
               <div
-                className="brand-gradient relative aspect-[9/16] overflow-hidden rounded-lg bg-cover bg-center ring-1 ring-border"
+                className="brand-gradient rounded-inner relative aspect-[9/16] overflow-hidden bg-cover bg-center ring-1 ring-border"
                 style={settings.backgroundImageUrl ? { backgroundImage: `url(${settings.backgroundImageUrl})` } : undefined}
               >
                 {!settings.backgroundImageUrl && (
@@ -130,7 +130,7 @@ export function Branding() {
                 )}
               </div>
               <div className="grid content-start gap-3">
-                <ImageDropzone onFiles={replaceBackground} busy={uploading} title="Upload a new background" />
+                <ImageDropzone onFiles={replaceBackground} busy={uploading} title="Upload a new background" className="rounded-inner" />
                 {settings.backgroundImageUrl && (
                   <Button variant="outline" onClick={removeBackground} disabled={background.pending} className="justify-self-start">
                     <Trash2 /> Remove background
@@ -143,8 +143,8 @@ export function Branding() {
 
         {!embedded && (
           <div className="hidden lg:block">
-            <Card className="sticky top-0 p-3">
-              <LivePreview />
+            <Card className="sticky top-0 p-3 [--outer-padding:0.75rem] sm:[--outer-padding:0.75rem]">
+              <LivePreview className="rounded-inner" />
             </Card>
           </div>
         )}

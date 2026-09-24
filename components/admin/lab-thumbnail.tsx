@@ -13,7 +13,7 @@ export const labMonogram = (code: string, name: string) =>
 
 export function LabThumbnail({ src, code, name, className }: LabThumbnailProps) {
   return (
-    <span className={cn("relative flex aspect-[16/11] shrink-0 items-center justify-center overflow-hidden rounded-lg", className)}>
+    <span className={cn("rounded-inner relative flex aspect-[16/11] shrink-0 items-center justify-center overflow-hidden", className)}>
       {src ? (
         <img src={src} alt={name} className="h-full w-full object-cover" />
       ) : (

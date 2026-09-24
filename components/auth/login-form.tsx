@@ -90,7 +90,7 @@ export function LoginForm() {
           <Card className="mt-6 p-5 sm:p-6">
             <form onSubmit={onSubmit} className="grid gap-4" noValidate>
               {error && (
-                <div role="alert" className="flex items-start gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                <div role="alert" className="rounded-inner flex items-start gap-2 bg-destructive/10 p-3 text-sm text-destructive">
                   <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                   {error}
                 </div>

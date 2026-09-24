@@ -58,9 +58,9 @@ function RegionPicker({ onSelect }: { onSelect: (region: DisplayRegion) => void 
             key={region}
             type="button"
             onClick={() => onSelect(region)}
-            className="flex items-center gap-3 rounded-xl border bg-card p-3 text-left transition-all hover:border-primary/40 hover:bg-accent/40 active:scale-[0.98]"
+            className="flex items-center gap-3 rounded-xl border bg-card p-3 text-left transition-all [--outer-padding:0.75rem] [--outer-radius:var(--radius-xl)] hover:border-primary/40 hover:bg-accent/40 active:scale-[0.98]"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+            <span className="rounded-inner flex h-9 w-9 shrink-0 items-center justify-center bg-accent text-accent-foreground">
               <Icon className="h-4 w-4" />
             </span>
             <span className="min-w-0 flex-1">

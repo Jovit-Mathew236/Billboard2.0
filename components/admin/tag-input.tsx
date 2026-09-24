@@ -40,9 +40,9 @@ export function TagInput({ label, value, onChange, placeholder, hint, suggestion
   return (
     <div className="grid gap-1.5">
       <Label>{label}</Label>
-      <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border border-input bg-card px-2 py-1.5 shadow-sm focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background">
+      <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border border-input bg-card px-2 py-1.5 [--outer-padding:0.375rem] [--outer-radius:var(--radius-lg)] shadow-sm focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background">
         {value.map((tag) => (
-          <span key={tag} className="inline-flex items-center gap-1 rounded-md bg-accent py-0.5 pl-2 pr-1 text-xs font-medium text-accent-foreground">
+          <span key={tag} className="rounded-inner inline-flex items-center gap-1 bg-accent py-0.5 pl-2 pr-1 text-xs font-medium text-accent-foreground">
             {tag}
             <button
               type="button"

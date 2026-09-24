@@ -43,10 +43,10 @@ export function FormDialog({
           </DialogHeader>
           <div className="grid gap-4">{children}</div>
           <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={pending} className="sm:rounded-inner">
               Cancel
             </Button>
-            <Button type="submit" disabled={pending}>
+            <Button type="submit" disabled={pending} className="sm:rounded-inner">
               {pending && <Loader2 className="animate-spin" />}
               {submitLabel}
             </Button>
