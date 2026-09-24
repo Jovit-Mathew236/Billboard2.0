@@ -1,5 +1,6 @@
 import {
   Eye,
+  FlaskConical,
   PenSquare,
   GraduationCap,
   Images,
@@ -38,6 +39,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/admin/general", label: "Branding", icon: Settings2 },
       { href: "/admin/staff", label: "Staff counts", icon: UsersRound },
       { href: "/admin/faculty", label: "Faculty", icon: GraduationCap, mobile: true },
+      { href: "/admin/labs", label: "Labs", icon: FlaskConical },
       { href: "/admin/batches", label: "Batch highlights", icon: TrendingUp },
       { href: "/admin/gallery", label: "Photo carousel", icon: Images, mobile: true },
     ],

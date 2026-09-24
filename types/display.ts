@@ -35,6 +35,16 @@ export interface CarouselImage {
   order?: number;
 }
 
+export interface Lab {
+  id: string;
+  name: string;
+  code: string;
+  subject: string;
+  thumbnailUrl?: string;
+  thumbnailS3Key?: string;
+  order?: number;
+}
+
 export type UserRole = "admin" | "superadmin" | "faculty";
 
 export interface AppUser {

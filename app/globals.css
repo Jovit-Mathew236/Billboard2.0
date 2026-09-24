@@ -24,7 +24,8 @@
     --border: 245 18% 90%;
     --input: 245 18% 86%;
     --ring: 253 56% 52%;
-    --radius: 0.75rem;
+    --radius: 1rem;
+    --display-radius-scale: 2.85;
   }
 
   .dark {
@@ -86,12 +87,25 @@ html[data-keyboard="open"] [role="dialog"] {
   padding-bottom: 1rem;
 }
 
+@supports (corner-shape: squircle) {
+  :root {
+    --radius: 1.625rem;
+    --display-radius-scale: 2.85;
+  }
+
+  *:not(.rounded-full) {
+    corner-shape: squircle;
+  }
+}
+
 @keyframes splash-wave {
+
   0%,
   100% {
     opacity: 0.25;
     transform: translateY(0) scale(0.85);
   }
+
   40% {
     opacity: 1;
     transform: translateY(-4px) scale(1);

@@ -22,6 +22,7 @@ export const UPLOAD_PROFILES = {
   carousel: { prefix: "imagetemp", maxDimension: 2560, quality: 80 },
   background: { prefix: "global", maxDimension: 3840, quality: 90 },
   avatar: { prefix: "users", maxDimension: 512, quality: 80 },
+  lab: { prefix: "labs", maxDimension: 1200, quality: 82 },
 } as const;
 
 export type UploadProfile = keyof typeof UPLOAD_PROFILES;

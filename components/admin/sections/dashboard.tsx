@@ -5,7 +5,7 @@ import { AlertCircle, CheckCircle2, Eye, PenSquare, GraduationCap, Images, Trend
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/provider/authProvider";
-import { useBatches, useCarouselImages, useDisplaySettings, useFaculty, useStaffPositions } from "@/hooks/use-display-data";
+import { useBatches, useCarouselImages, useDisplaySettings, useFaculty, useLabs, useStaffPositions } from "@/hooks/use-display-data";
 import { LivePreview } from "../live-preview";
 import { PageHeader } from "../page-header";
 import { StatCard } from "../stat-card";
@@ -24,6 +24,7 @@ export function Dashboard() {
   const faculty = useFaculty();
   const images = useCarouselImages();
   const batches = useBatches();
+  const labs = useLabs();
 
   const loading = staff.loading || faculty.loading || images.loading || batches.loading || settings.loading;
   const error = staff.error || faculty.error || images.error || batches.error || settings.error;
@@ -31,6 +32,7 @@ export function Dashboard() {
   const checks = [
     { ok: staff.data.length > 0, label: "Staff counts", fix: "Placeholders are shown until you add staff roles.", href: "/admin/staff" },
     { ok: faculty.data.length > 0, label: "Faculty list", fix: "The faculty card is empty.", href: "/admin/faculty" },
+    { ok: labs.data.length > 0, label: "Labs", fix: labs.error ?? "No lab pages are shown yet.", href: "/admin/labs" },
     { ok: images.data.length > 0, label: "Photo carousel", fix: "The carousel shows \"No image\".", href: "/admin/gallery" },
     { ok: batches.entries.length > 0, label: "Batch highlights", fix: "Default numbers are shown.", href: "/admin/batches" },
   ];

@@ -5,6 +5,7 @@ export const COLLECTIONS = {
   images: "images",
   blocks: "blocks",
   users: "users",
+  labs: "labs",
 } as const;
 
 export const SETTINGS_DOC_ID = "global";

@@ -8,10 +8,11 @@ import {
   useCarouselImages,
   useDisplaySettings,
   useFaculty,
+  useLabs,
   useStaffPositions,
 } from "@/hooks/use-display-data";
 import { BatchEntry } from "@/lib/utils/batches";
-import { CarouselImage, FacultyMember } from "@/types/display";
+import { CarouselImage, FacultyMember, Lab } from "@/types/display";
 import { EditHotspot, EditModeProvider, useEditModeState } from "./edit-hotspot";
 
 const geistSans = localFont({
@@ -44,6 +45,8 @@ function useNightlyReload(enabled: boolean) {
     return () => clearTimeout(id);
   }, [enabled]);
 }
+
+const radius = (vh: number) => `calc(${vh}vh * var(--display-radius-scale, 1))`;
 
 const GRAD =
   "linear-gradient(160deg, #3b2fa0 0%, #5b3ec8 35%, #6d3bbd 60%, #4e2a9a 100%)";
@@ -83,6 +86,7 @@ function WeatherTimePill() {
 
   return (
     <div
+      className="rounded-full"
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -119,7 +123,7 @@ function StaffStatCard({ position, count }: { position: string; count: string })
       style={{
         background: "rgba(255,255,255,0.13)",
         backdropFilter: "blur(10px)",
-        borderRadius: "2.2vh",
+        borderRadius: radius(2.2),
         border: "1px solid rgba(255,255,255,0.16)",
         padding: "1.9vh 2.5vh",
         display: "flex",
@@ -157,7 +161,7 @@ function DegreeBadge({ label }: { label: string }) {
         display: "inline-block",
         background: "rgba(90,60,200,0.12)",
         border: "1px solid rgba(90,60,200,0.28)",
-        borderRadius: "0.85vh",
+        borderRadius: radius(0.85),
         padding: "0.3vh 1.25vh",
         fontSize: "1.5vh",
         color: "#4a3aaa",
@@ -206,10 +210,89 @@ function CrossFade({
 }
 
 // ─────────────────── FacultyCard ───────────────────
-function FacultyCard({ members }: { members: FacultyMember[] }) {
-  const PAGE_SIZE = 9;
+const FACULTY_PER_PAGE = 9;
+const LABS_PER_PAGE = 5;
+
+type CardPage = { kind: "faculty"; members: FacultyMember[] } | { kind: "labs"; labs: Lab[] };
+
+const chunk = <T,>(items: T[], size: number) =>
+  Array.from({ length: Math.ceil(items.length / size) }, (_, i) => items.slice(i * size, i * size + size));
+
+function FacultyMemberRow({ member }: { member: FacultyMember }) {
+  const degrees = (member.specializedIn ?? "").split(",").filter(Boolean);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.55vh" }}>
+      <div style={{ fontSize: "2.35vh", fontWeight: 700, color: "#2d1fa3", lineHeight: 1.2 }}>{member.name}</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.55vh" }}>
+        {degrees.map((d, i) => (
+          <DegreeBadge key={i} label={d} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LabBadge({ label }: { label: string }) {
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        background: "#8e84d6",
+        borderRadius: radius(0.85),
+        padding: "0.35vh 1.1vh",
+        fontSize: "1.55vh",
+        color: "#fff",
+        fontWeight: 500,
+        lineHeight: 1.45,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+function LabRow({ lab }: { lab: Lab }) {
+  const monogram = (lab.code.split(/[\s-]+/)[0] || lab.name.split(/\s+/).map((w) => w[0]).join("")).slice(0, 4).toUpperCase();
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "2vh" }}>
+      <div
+        style={{
+          flex: "0 0 40%",
+          aspectRatio: "16 / 11",
+          borderRadius: radius(1.9),
+          overflow: "hidden",
+          background: lab.thumbnailUrl ? "#e8e8ee" : GRAD,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {lab.thumbnailUrl ? (
+          <img src={lab.thumbnailUrl} alt={lab.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+          <span style={{ color: "#fff", fontSize: "3vh", fontWeight: 800, letterSpacing: "-0.02em" }}>{monogram}</span>
+        )}
+      </div>
+      <div style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: "0.7vh" }}>
+        <div style={{ fontSize: "2.9vh", fontWeight: 500, color: "#4b3bb8", lineHeight: 1.15 }}>{lab.name}</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6vh" }}>
+          {lab.code && <LabBadge label={lab.code} />}
+          {lab.subject && <LabBadge label={lab.subject} />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FacultyCard({ members, labs }: { members: FacultyMember[]; labs: Lab[] }) {
   const [page, setPage] = useState(0);
-  const totalPages = Math.max(1, Math.ceil(members.length / PAGE_SIZE));
+  const pages: CardPage[] = [
+    ...chunk(members, FACULTY_PER_PAGE).map((slice) => ({ kind: "faculty" as const, members: slice })),
+    ...chunk(labs, LABS_PER_PAGE).map((slice) => ({ kind: "labs" as const, labs: slice })),
+  ];
+  const totalPages = Math.max(1, pages.length);
+  const current = page % totalPages;
 
   useEffect(() => {
     if (totalPages <= 1) return;
@@ -217,46 +300,41 @@ function FacultyCard({ members }: { members: FacultyMember[] }) {
     return () => clearInterval(id);
   }, [totalPages]);
 
-  const pages = Array.from({ length: totalPages }, (_, p) =>
-    members.slice(p * PAGE_SIZE, p * PAGE_SIZE + PAGE_SIZE)
-  );
-
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: "2.75vh",
-        padding: "2.75vh 3vh",
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-        boxSizing: "border-box",
-      }}
-    >
-      <CrossFade
-        index={page % totalPages}
-        style={{ width: "100%", height: "100%" }}
-        slides={pages.map((slice, p) => (
-          <div key={p} style={{ display: "flex", flexDirection: "column", gap: "1.4vh", height: "100%" }}>
-            {slice.map((m) => {
-              const degrees = (m.specializedIn ?? "").split(",").filter(Boolean);
-              return (
-                <div key={m.id} style={{ display: "flex", flexDirection: "column", gap: "0.55vh" }}>
-                  <div style={{ fontSize: "2.35vh", fontWeight: 700, color: "#2d1fa3", lineHeight: 1.2 }}>
-                    {m.name}
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.55vh" }}>
-                    {degrees.map((d, i) => (
-                      <DegreeBadge key={i} label={d} />
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      />
-    </div>
+    <>
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: radius(2.75),
+          padding: "2.75vh 3vh",
+          width: "100%",
+          height: "100%",
+          overflow: "hidden",
+          boxSizing: "border-box",
+        }}
+      >
+        <CrossFade
+          index={current}
+          style={{ width: "100%", height: "100%" }}
+          slides={pages.map((cardPage, p) =>
+            cardPage.kind === "faculty" ? (
+              <div key={p} style={{ display: "flex", flexDirection: "column", gap: "1.4vh", height: "100%" }}>
+                {cardPage.members.map((m) => (
+                  <FacultyMemberRow key={m.id} member={m} />
+                ))}
+              </div>
+            ) : (
+              <div key={p} style={{ display: "flex", flexDirection: "column", gap: "1.8vh", height: "100%" }}>
+                {cardPage.labs.map((lab) => (
+                  <LabRow key={lab.id} lab={lab} />
+                ))}
+              </div>
+            )
+          )}
+        />
+      </div>
+      <EditHotspot region={pages[current]?.kind === "labs" ? "labs" : "faculty"} />
+    </>
   );
 }
 
@@ -279,7 +357,7 @@ function ImageCarousel({ images }: { images: CarouselImage[] }) {
           width: "100%",
           height: "100%",
           background: "rgba(255,255,255,0.1)",
-          borderRadius: "1.85vh",
+          borderRadius: radius(1.85),
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -298,30 +376,51 @@ function ImageCarousel({ images }: { images: CarouselImage[] }) {
         position: "relative",
         width: "100%",
         height: "100%",
-        borderRadius: "1.85vh",
+        borderRadius: radius(1.85),
         overflow: "hidden",
-        background: "#e8e8ee",
+        background: "rgba(20,14,60,0.6)",
       }}
     >
       {images.map((img, i) => {
         const offset = (i - current + images.length) % images.length;
         if (offset > 1 && offset !== images.length - 1) return null;
         return (
-          <img
+          <div
             key={img.id}
-            src={img.imageUrl}
-            alt={`photo-${i}`}
             style={{
               position: "absolute",
               inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "contain",
-              objectPosition: "center center",
               opacity: i === current ? 1 : 0,
               transition: "opacity 1s ease",
             }}
-          />
+          >
+            <img
+              src={img.imageUrl}
+              alt=""
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transform: "scale(1.2)",
+                filter: "blur(2.5vh) brightness(0.85) saturate(1.2)",
+              }}
+            />
+            <img
+              src={img.imageUrl}
+              alt={`photo-${i}`}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                objectPosition: "center center",
+              }}
+            />
+          </div>
         );
       })}
     </div>
@@ -364,16 +463,35 @@ function DepartmentHighlights({
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: "1.1vh",
+        gap: "0.9vh",
         flexShrink: 0,
+        padding: "1vh",
+        borderRadius: radius(2.6),
+        background: "rgba(38,30,92,0.55)",
+        border: "1px solid rgba(255,255,255,0.14)",
+        backdropFilter: "blur(10px)",
       }}
     >
-      {/* Batch indicator dots */}
+      <CrossFade
+        index={safeIdx}
+        slides={entries.map((current, e) => (
+          <div key={e} style={{ display: "flex", flexDirection: "column", gap: "0.9vh" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.9vh" }}>
+              <HighlightTile label="Batch" value={current.batchYear} />
+              <HighlightTile label="No of Students" value={current.studentCount} />
+            </div>
+            <HighlightRow label="Placements" value={current.placements} />
+            <HighlightRow label="Higher Study" value={current.higherStudy} />
+          </div>
+        ))}
+      />
+
       {entries.length > 1 && (
         <div style={{ display: "flex", justifyContent: "center", gap: "0.6vh" }}>
           {entries.map((_, i) => (
             <div
               key={i}
+              className="rounded-full"
               style={{
                 width: i === safeIdx ? "1.8vh" : "0.7vh",
                 height: "0.7vh",
@@ -385,32 +503,42 @@ function DepartmentHighlights({
           ))}
         </div>
       )}
+    </div>
+  );
+}
 
-      <CrossFade
-        index={safeIdx}
-        slides={entries.map((current, e) => (
-          <div key={e} style={{ display: "flex", flexDirection: "column", gap: "1.1vh" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.1vh" }}>
-              <div style={{ background: "rgba(20,14,60,0.82)", backdropFilter: "blur(10px)", borderRadius: "1.9vh", padding: "1.4vh 1.9vh", border: "1px solid rgba(255,255,255,0.1)" }}>
-                <div style={{ fontSize: "1.3vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.42vh", letterSpacing: "0.04em" }}>Batch</div>
-                <div style={{ fontSize: "3vh", fontWeight: 800, color: "#fff" }}>{current.batchYear}</div>
-              </div>
-              <div style={{ background: "rgba(20,14,60,0.82)", backdropFilter: "blur(10px)", borderRadius: "1.9vh", padding: "1.4vh 1.9vh", border: "1px solid rgba(255,255,255,0.1)" }}>
-                <div style={{ fontSize: "1.3vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.42vh", letterSpacing: "0.04em" }}>No of Students</div>
-                <div style={{ fontSize: "3vh", fontWeight: 800, color: "#fff" }}>{current.studentCount}</div>
-              </div>
-            </div>
-            <div style={{ background: "#ffffff", borderRadius: "1.9vh", padding: "1.4vh 2.2vh", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Placements Offers</span>
-              <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{current.placements || "-"}</span>
-            </div>
-            <div style={{ background: "#ffffff", borderRadius: "1.9vh", padding: "1.4vh 2.2vh", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: "2.35vh", fontWeight: 600, color: "#1a1a2e" }}>Higher Study</span>
-              <span style={{ fontSize: "3.3vh", fontWeight: 900, color: "#1a1a2e", borderLeft: "0.42vh solid #1a1a2e", paddingLeft: "1.9vh" }}>{current.higherStudy || "-"}</span>
-            </div>
-          </div>
-        ))}
-      />
+function HighlightTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      style={{
+        background: "rgba(16,12,40,0.88)",
+        borderRadius: radius(1.9),
+        padding: "1.2vh 1.7vh",
+        border: "1px solid rgba(255,255,255,0.08)",
+      }}
+    >
+      <div style={{ fontSize: "1.3vh", color: "rgba(255,255,255,0.5)", marginBottom: "0.3vh", letterSpacing: "0.02em" }}>{label}</div>
+      <div style={{ fontSize: "3vh", fontWeight: 600, color: "#fff", lineHeight: 1.15 }}>{value}</div>
+    </div>
+  );
+}
+
+function HighlightRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      style={{
+        background: "#ffffff",
+        borderRadius: radius(1.9),
+        padding: "1.2vh 2vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "1.6vh",
+      }}
+    >
+      <span style={{ fontSize: "2.5vh", fontWeight: 500, color: "#111", letterSpacing: "-0.01em" }}>{label}</span>
+      <span style={{ width: "0.2vh", alignSelf: "stretch", background: "#111", margin: "-0.4vh 0" }} />
+      <span style={{ fontSize: "3.2vh", fontWeight: 800, color: "#111", minWidth: "3vh" }}>{value || "-"}</span>
     </div>
   );
 }
@@ -453,7 +581,7 @@ function NewsTickerBottom() {
         height: "100%",
         background: "rgba(18,14,48,0.85)",
         backdropFilter: "blur(14px)",
-        borderRadius: "2.2vh",
+        borderRadius: radius(2.2),
         padding: "0 3.9vh",
         border: "1px solid rgba(255,255,255,0.1)",
         boxSizing: "border-box",
@@ -492,6 +620,7 @@ export default function DisplayLayout() {
   const { data: settings } = useDisplaySettings();
   const { data: positions } = useStaffPositions();
   const { data: faculty } = useFaculty();
+  const { data: labs } = useLabs();
   const { data: carouselImages } = useCarouselImages();
   const { entries: batches } = useBatches();
   const editMode = useEditModeState();
@@ -568,7 +697,7 @@ export default function DisplayLayout() {
             width: "0.42vh",
             height: "9.6vh",
             background: "rgba(255,255,255,0.45)",
-            borderRadius: "0.19vh",
+            borderRadius: radius(0.19),
             flexShrink: 0,
           }}
         />
@@ -606,8 +735,7 @@ export default function DisplayLayout() {
         }}
       >
         <div style={{ flex: "0 0 48%", minWidth: 0, minHeight: 0, position: "relative" }}>
-          <FacultyCard members={faculty} />
-          <EditHotspot region="faculty" />
+          <FacultyCard members={faculty} labs={labs} />
         </div>
 
         <div

@@ -9,7 +9,7 @@ export interface UploadResult {
   key: string;
 }
 
-export type UploadFolder = "carousel" | "background" | "avatar";
+export type UploadFolder = "carousel" | "background" | "avatar" | "lab";
 
 export const uploadImage = (image: string, folder: UploadFolder) =>
   apiFetch<UploadResult>("/api/uploads", { method: "POST", body: { image, folder } });

@@ -3,6 +3,7 @@
 import { ComponentType, useCallback, useEffect, useRef, useState } from "react";
 import {
   ChevronLeft,
+  FlaskConical,
   CloudSun,
   GraduationCap,
   Images,
@@ -25,6 +26,7 @@ import { BatchManager } from "./batch-manager";
 import { Branding } from "./branding";
 import { FacultyManager } from "./faculty-manager";
 import { GalleryManager } from "./gallery-manager";
+import { LabManager } from "./lab-manager";
 import { StaffManager } from "./staff-manager";
 
 interface RegionConfig {
@@ -38,12 +40,13 @@ const REGIONS: Record<DisplayRegion, RegionConfig> = {
   branding: { icon: Settings2, hint: "Logo, department name and background.", editor: Branding },
   staff: { icon: UsersRound, hint: "The row of staff numbers.", editor: StaffManager },
   faculty: { icon: GraduationCap, hint: "Names and qualifications in the white card.", editor: FacultyManager },
+  labs: { icon: FlaskConical, hint: "Lab pages shown after the faculty list.", editor: LabManager },
   gallery: { icon: Images, hint: "Photos rotating in the right column.", editor: GalleryManager },
   batches: { icon: TrendingUp, hint: "Students, placements and higher studies.", editor: BatchManager },
   news: { icon: Newspaper, hint: "Latest headlines, refreshed every 5 minutes automatically." },
 };
 
-const ORDER: DisplayRegion[] = ["branding", "staff", "faculty", "gallery", "batches", "weather", "news"];
+const ORDER: DisplayRegion[] = ["branding", "staff", "faculty", "labs", "gallery", "batches", "weather", "news"];
 
 function RegionPicker({ onSelect }: { onSelect: (region: DisplayRegion) => void }) {
   return (

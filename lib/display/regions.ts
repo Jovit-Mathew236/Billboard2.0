@@ -1,4 +1,4 @@
-export const DISPLAY_REGIONS = ["weather", "branding", "staff", "faculty", "gallery", "batches", "news"] as const;
+export const DISPLAY_REGIONS = ["weather", "branding", "staff", "faculty", "labs", "gallery", "batches", "news"] as const;
 
 export type DisplayRegion = (typeof DISPLAY_REGIONS)[number];
 
@@ -7,6 +7,7 @@ export const REGION_LABELS: Record<DisplayRegion, string> = {
   branding: "Branding",
   staff: "Staff counts",
   faculty: "Faculty",
+  labs: "Labs",
   gallery: "Photo carousel",
   batches: "Batch highlights",
   news: "News ticker",

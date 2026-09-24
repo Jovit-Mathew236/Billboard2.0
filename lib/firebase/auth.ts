@@ -26,7 +26,7 @@ const AUTH_MESSAGES: Record<string, string> = {
 export const describeError = (error: unknown, fallback = "Something went wrong.") => {
   if (error instanceof FirebaseError) {
     if (AUTH_MESSAGES[error.code]) return AUTH_MESSAGES[error.code];
-    if (error.code === "permission-denied") return "You don't have permission to make this change.";
+    if (error.code === "permission-denied") return "Blocked by Firestore security rules. Check this collection is allowed in the Firebase Console rules.";
     if (error.code === "unavailable") return "Can't reach the database. Check your connection.";
     return error.message;
   }
