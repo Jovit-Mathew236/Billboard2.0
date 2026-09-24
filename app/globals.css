@@ -24,8 +24,11 @@
     --border: 245 18% 90%;
     --input: 245 18% 86%;
     --ring: 253 56% 52%;
-    --radius: 1rem;
-    --display-radius-scale: 2.85;
+    --corner-size: 1.625rem;
+    --display-corner-size: 2.85;
+    --corner-compensation: 0.55;
+    --radius: calc(var(--corner-size) * var(--corner-compensation));
+    --display-radius-scale: calc(var(--display-corner-size) * var(--corner-compensation));
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
@@ -95,8 +98,7 @@ html[data-keyboard="open"] [role="dialog"] {
 
 @supports (corner-shape: squircle) {
   :root {
-    --radius: 1.625rem;
-    --display-radius-scale: 2.85;
+    --corner-compensation: 1;
   }
 
   *:not(.rounded-full) {
